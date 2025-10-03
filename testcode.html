@@ -836,47 +836,25 @@
                 // Google Sheets CSV URL
                 const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgWOz_gOtciT9cHESUTkEI6TJZhhrdMqMLo8SdSlMrEpfWtNaoEWCBaHgoYiIuupp3buEWL-OXJx1-/pub?gid=0&single=true&output=csv';
                 
-                // Add timeout and better error handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-                
                 const response = await fetch(csvUrl, {
-                    signal: controller.signal,
                     cache: 'no-cache',
                     headers: {
                         'Cache-Control': 'no-cache'
                     }
                 });
                 
-                clearTimeout(timeoutId);
-                
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const csvText = await response.text();
                 console.log('📄 CSV data received, length:', csvText.length);
                 
-                // Check if we got valid CSV data
-                if (!csvText || csvText.trim().length === 0) {
-                    throw new Error('Empty CSV response from Google Sheets');
-                }
-                
                 // Parse CSV data
-                const lines = csvText.split('\n').filter(line => line.trim()); // Remove empty lines
+                const lines = csvText.split('\n').filter(line => line.trim());
                 
-                if (lines.length === 0) {
-                    console.log('⚠️ No data lines found in CSV');
-                    // This is not an error - just empty sheet
-                    registrations = [];
-                    paymentData = {};
-                    localStorage.setItem('uasaRegistrations', JSON.stringify(registrations));
-                    localStorage.setItem('uasaPaymentData', JSON.stringify(paymentData));
-                    
-                    updateStatistics();
-                    updateStudentsList();
-                    updateRegistrationStatus();
-                    
+                if (lines.length <= 1) {
+                    console.log('⚠️ No data rows found in CSV (only header or empty)');
                     if (isAdminLoggedIn) {
                         showTemporaryMessage('ℹ️ Google Sheets kosong - tiada pendaftaran', 'info');
                     }
@@ -888,35 +866,15 @@
                 
                 const newRegistrations = [];
                 const newPaymentData = {};
-                const seenStudents = new Set(); // Track unique students to prevent duplicates
-                let processedRows = 0;
-                let duplicateCount = 0;
                 
                 // Process each data row (skip header)
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
-                    if (!line) continue; // Skip empty lines
+                    if (!line) continue;
                     
                     try {
-                        // Parse CSV line (handle quoted values)
-                        const values = [];
-                        let current = '';
-                        let inQuotes = false;
-                        
-                        for (let j = 0; j < line.length; j++) {
-                            const char = line[j];
-                            if (char === '"') {
-                                inQuotes = !inQuotes;
-                            } else if (char === ',' && !inQuotes) {
-                                values.push(current.trim().replace(/"/g, ''));
-                                current = '';
-                            } else {
-                                current += char;
-                            }
-                        }
-                        values.push(current.trim().replace(/"/g, '')); // Add last value
-                        
-                        processedRows++;
+                        // Simple CSV parsing - split by comma and clean quotes
+                        const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
                         
                         if (values.length >= 5) {
                             const registration = {
@@ -927,25 +885,14 @@
                                 telefon: values[4] || ''
                             };
                             
-                            // Only add if all required fields are present
+                            // Only add if required fields are present
                             if (registration.nama && registration.kelas && registration.slotMasa) {
-                                // Create unique key to prevent duplicates
-                                const uniqueKey = `${registration.nama}_${registration.kelas}_${registration.slotMasa}`;
-                                
-                                // Skip if we've already seen this student (prevent duplicates)
-                                if (seenStudents.has(uniqueKey)) {
-                                    console.log('⚠️ Duplicate student detected, skipping:', uniqueKey);
-                                    duplicateCount++;
-                                    continue;
-                                }
-                                
-                                seenStudents.add(uniqueKey);
                                 newRegistrations.push(registration);
                                 
-                                // Load payment and attendance data from columns G and H (index 6 and 7)
+                                // Load payment and attendance data from columns 6 and 7 (G and H)
                                 const studentId = `${registration.nama}_${registration.kelas}_${registration.timestamp}`;
-                                const bayaranStatus = values[6] || '';  // Column G
-                                const kehadiranStatus = values[7] || ''; // Column H
+                                const bayaranStatus = values[6] || '';
+                                const kehadiranStatus = values[7] || '';
                                 
                                 newPaymentData[studentId] = {
                                     paid: bayaranStatus.toUpperCase() === 'SUDAH',
@@ -955,16 +902,12 @@
                         }
                     } catch (rowError) {
                         console.warn('⚠️ Error parsing row', i, ':', rowError.message);
-                        // Continue processing other rows
                     }
                 }
                 
-                console.log('✅ Processing complete:');
-                console.log('  - Rows processed:', processedRows);
-                console.log('  - Valid registrations:', newRegistrations.length);
-                console.log('  - Duplicates removed:', duplicateCount);
+                console.log('✅ Processing complete:', newRegistrations.length, 'registrations');
                 
-                // Update local storage with fresh data
+                // Update global variables and local storage
                 registrations = newRegistrations;
                 paymentData = newPaymentData;
                 localStorage.setItem('uasaRegistrations', JSON.stringify(registrations));
@@ -972,16 +915,14 @@
                 
                 // Update all displays
                 updateStatistics();
-                updateStudentsList();
+                if (typeof updateStudentsList === 'function') {
+                    updateStudentsList();
+                }
                 updateRegistrationStatus();
                 
                 // Show success message if in admin mode
                 if (isAdminLoggedIn) {
-                    let message = `✅ Data dikemaskini: ${registrations.length} pendaftaran`;
-                    if (duplicateCount > 0) {
-                        message += ` (${duplicateCount} duplicate dibuang)`;
-                    }
-                    showTemporaryMessage(message, 'success');
+                    showTemporaryMessage(`✅ Data dikemaskini: ${registrations.length} pendaftaran`, 'success');
                 }
                 
                 console.log('✅ Data refresh completed successfully');
@@ -990,52 +931,43 @@
             } catch (error) {
                 console.error('❌ Error refreshing data:', error);
                 
-                // Determine error type for better user feedback
-                let errorMessage = '⚠️ Menggunakan data tempatan';
-                
-                if (error.name === 'AbortError') {
-                    errorMessage = '⏱️ Timeout - menggunakan data tempatan';
-                    console.log('Request timed out after 10 seconds');
-                } else if (error.message.includes('Failed to fetch')) {
-                    errorMessage = '🌐 Tiada sambungan internet - menggunakan data tempatan';
-                    console.log('Network error - no internet connection');
-                } else if (error.message.includes('HTTP')) {
-                    errorMessage = '📄 Google Sheets tidak dapat diakses - menggunakan data tempatan';
-                    console.log('HTTP error from Google Sheets');
-                } else {
-                    console.log('Unknown error:', error.message);
-                }
-                
-                // Fallback to local data (this should not fail)
+                // Fallback to local data
                 try {
-                    registrations = JSON.parse(localStorage.getItem('uasaRegistrations')) || [];
-                    paymentData = JSON.parse(localStorage.getItem('uasaPaymentData')) || {};
+                    const localRegistrations = JSON.parse(localStorage.getItem('uasaRegistrations')) || [];
+                    const localPaymentData = JSON.parse(localStorage.getItem('uasaPaymentData')) || {};
+                    
+                    // Only update if we have local data, otherwise keep current data
+                    if (localRegistrations.length > 0 || registrations.length === 0) {
+                        registrations = localRegistrations;
+                        paymentData = localPaymentData;
+                    }
                     
                     updateStatistics();
-                    updateStudentsList();
+                    if (typeof updateStudentsList === 'function') {
+                        updateStudentsList();
+                    }
                     updateRegistrationStatus();
                     
-                    // Show appropriate message if in admin mode
+                    // Show appropriate error message
+                    let errorMessage = '⚠️ Menggunakan data tempatan';
+                    if (error.message.includes('Failed to fetch')) {
+                        errorMessage = '🌐 Tiada sambungan internet - menggunakan data tempatan';
+                    } else if (error.message.includes('HTTP')) {
+                        errorMessage = '📄 Google Sheets tidak dapat diakses - menggunakan data tempatan';
+                    }
+                    
                     if (isAdminLoggedIn) {
                         showTemporaryMessage(errorMessage, 'warning');
                     }
                     
                     console.log('✅ Fallback to local data successful:', registrations.length, 'registrations');
-                    return false; // Indicate we used fallback data
+                    return false;
                     
                 } catch (localError) {
                     console.error('❌ Critical error: Local data also failed:', localError);
                     
-                    // Last resort - initialize empty data
-                    registrations = [];
-                    paymentData = {};
-                    
-                    updateStatistics();
-                    updateStudentsList();
-                    updateRegistrationStatus();
-                    
                     if (isAdminLoggedIn) {
-                        showTemporaryMessage('❌ Ralat kritikal - data direset', 'warning');
+                        showTemporaryMessage('❌ Ralat mengakses data', 'warning');
                     }
                     
                     return false;
@@ -1263,6 +1195,11 @@
             document.getElementById('attendancePresentCount').textContent = presentCount;
             document.getElementById('attendanceAbsentCount').textContent = absentCount;
             document.getElementById('attendanceRate').textContent = `${attendanceRate}%`;
+        }
+        
+        // Update students list (alias for updatePaymentStudentsList)
+        function updateStudentsList() {
+            updatePaymentStudentsList();
         }
         
         // Update payment students list
@@ -1628,50 +1565,112 @@
 
         // Update statistics display
         function updateStatistics() {
-            const slot1Count = registrations.filter(r => r.slotMasa === '8.00-9.15 pagi').length;
-            const slot2Count = registrations.filter(r => r.slotMasa === '9.30-10.45 pagi').length;
+            console.log('📊 Updating statistics with', registrations.length, 'registrations');
+            
+            // Debug: Log all registrations to check data structure
+            registrations.forEach((reg, index) => {
+                console.log(`Registration ${index + 1}:`, {
+                    nama: reg.nama,
+                    kelas: reg.kelas,
+                    slotMasa: reg.slotMasa,
+                    timestamp: reg.timestamp
+                });
+            });
+            
+            // Count slots with exact string matching and debug
+            const slot1Count = registrations.filter(r => {
+                const match = r.slotMasa === '8.00-9.15 pagi';
+                if (!match && r.slotMasa) {
+                    console.log('Slot 1 mismatch:', `"${r.slotMasa}" !== "8.00-9.15 pagi"`);
+                }
+                return match;
+            }).length;
+            
+            const slot2Count = registrations.filter(r => {
+                const match = r.slotMasa === '9.30-10.45 pagi';
+                if (!match && r.slotMasa) {
+                    console.log('Slot 2 mismatch:', `"${r.slotMasa}" !== "9.30-10.45 pagi"`);
+                }
+                return match;
+            }).length;
+            
             const totalCount = registrations.length;
+            
+            console.log('📊 Slot counts:', { slot1Count, slot2Count, totalCount });
 
-            // Update totals
-            document.getElementById('totalRegistered').textContent = totalCount;
-            document.getElementById('slot1Count').textContent = slot1Count;
-            document.getElementById('slot2Count').textContent = slot2Count;
+            // Update totals with safety checks
+            const totalElement = document.getElementById('totalRegistered');
+            const slot1Element = document.getElementById('slot1Count');
+            const slot2Element = document.getElementById('slot2Count');
+            
+            if (totalElement) totalElement.textContent = totalCount;
+            if (slot1Element) slot1Element.textContent = slot1Count;
+            if (slot2Element) slot2Element.textContent = slot2Count;
 
             // Update percentages and progress bars
             if (totalCount > 0) {
                 const slot1Percentage = Math.round((slot1Count / totalCount) * 100);
                 const slot2Percentage = Math.round((slot2Count / totalCount) * 100);
                 
-                document.getElementById('slot1Percentage').textContent = `${slot1Percentage}% daripada jumlah`;
-                document.getElementById('slot2Percentage').textContent = `${slot2Percentage}% daripada jumlah`;
+                const slot1PercentElement = document.getElementById('slot1Percentage');
+                const slot2PercentElement = document.getElementById('slot2Percentage');
+                const slot1ProgressElement = document.getElementById('slot1Progress');
+                const slot2ProgressElement = document.getElementById('slot2Progress');
                 
-                document.getElementById('slot1Progress').style.width = `${slot1Percentage}%`;
-                document.getElementById('slot2Progress').style.width = `${slot2Percentage}%`;
+                if (slot1PercentElement) slot1PercentElement.textContent = `${slot1Percentage}% daripada jumlah`;
+                if (slot2PercentElement) slot2PercentElement.textContent = `${slot2Percentage}% daripada jumlah`;
+                if (slot1ProgressElement) slot1ProgressElement.style.width = `${slot1Percentage}%`;
+                if (slot2ProgressElement) slot2ProgressElement.style.width = `${slot2Percentage}%`;
+                
+                console.log('📊 Slot percentages:', { slot1Percentage, slot2Percentage });
             } else {
-                document.getElementById('slot1Percentage').textContent = '0% daripada jumlah';
-                document.getElementById('slot2Percentage').textContent = '0% daripada jumlah';
-                document.getElementById('slot1Progress').style.width = '0%';
-                document.getElementById('slot2Progress').style.width = '0%';
+                const slot1PercentElement = document.getElementById('slot1Percentage');
+                const slot2PercentElement = document.getElementById('slot2Percentage');
+                const slot1ProgressElement = document.getElementById('slot1Progress');
+                const slot2ProgressElement = document.getElementById('slot2Progress');
+                
+                if (slot1PercentElement) slot1PercentElement.textContent = '0% daripada jumlah';
+                if (slot2PercentElement) slot2PercentElement.textContent = '0% daripada jumlah';
+                if (slot1ProgressElement) slot1ProgressElement.style.width = '0%';
+                if (slot2ProgressElement) slot2ProgressElement.style.width = '0%';
             }
 
-            // Update class breakdown
+            // Update class breakdown with debug
             const classes = ['4IB', '4IH', '4IK', '4IM', '4IS'];
             classes.forEach(className => {
-                const classCount = registrations.filter(r => r.kelas === className).length;
-                document.getElementById(`class${className}`).textContent = classCount;
+                const classCount = registrations.filter(r => {
+                    const match = r.kelas === className;
+                    if (!match && r.kelas) {
+                        console.log(`Class ${className} mismatch:`, `"${r.kelas}" !== "${className}"`);
+                    }
+                    return match;
+                }).length;
+                
+                const classElement = document.getElementById(`class${className}`);
+                if (classElement) {
+                    classElement.textContent = classCount;
+                    console.log(`📊 Class ${className}: ${classCount} students`);
+                } else {
+                    console.error(`❌ Element class${className} not found`);
+                }
             });
 
             // Update last updated time
-            if (registrations.length > 0) {
-                const lastRegistration = registrations[registrations.length - 1];
-                document.getElementById('lastUpdated').textContent = lastRegistration.timestamp;
-            } else {
-                document.getElementById('lastUpdated').textContent = '-';
+            const lastUpdatedElement = document.getElementById('lastUpdated');
+            if (lastUpdatedElement) {
+                if (registrations.length > 0) {
+                    const lastRegistration = registrations[registrations.length - 1];
+                    lastUpdatedElement.textContent = lastRegistration.timestamp || 'Tidak diketahui';
+                } else {
+                    lastUpdatedElement.textContent = '-';
+                }
             }
             
             // Also update payment data and statistics
             initializePaymentData();
             updatePaymentStatistics();
+            
+            console.log('✅ Statistics update completed');
         }
         
         // Tab navigation functions
@@ -2427,5 +2426,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988de013624ce708',t:'MTc1OTUwOTU2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988dfb671736e708',t:'MTc1OTUxMDY4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
