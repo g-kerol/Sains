@@ -541,6 +541,27 @@
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- Logout Section -->
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
+                            <div class="flex items-center">
+                                <div class="bg-red-100 rounded-full p-2 mr-3">
+                                    <span class="text-xl">🚪</span>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-red-800">Log Keluar Admin</h5>
+                                    <p class="text-sm text-red-600">Keluar dari panel admin dan kembali ke borang</p>
+                                </div>
+                            </div>
+                            <button id="logoutAdminBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                Log Keluar
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Last Updated -->
@@ -825,7 +846,7 @@
 
         // Admin system
         let adminPassword = localStorage.getItem('adminPassword') || 'admin123';
-        let isAdminLoggedIn = false;
+        let isAdminLoggedIn = JSON.parse(localStorage.getItem('isAdminLoggedIn')) || false;
         let registrationOpen = JSON.parse(localStorage.getItem('registrationOpen')) ?? true;
         
         // Function to refresh data from Google Sheets CSV
@@ -1114,6 +1135,7 @@
                     // Correct password
                     console.log('✅ Password correct, logging in admin...');
                     isAdminLoggedIn = true;
+                    localStorage.setItem('isAdminLoggedIn', JSON.stringify(true));
                     
                     if (adminModal) adminModal.classList.add('hidden');
                     
@@ -1169,6 +1191,7 @@
                 
                 // Reset admin login status and stop auto-refresh
                 isAdminLoggedIn = false;
+                localStorage.setItem('isAdminLoggedIn', JSON.stringify(false));
                 stopAutoRefresh();
                 
                 // Scroll to top
@@ -1799,6 +1822,10 @@
             registrationOpen = JSON.parse(localStorage.getItem('registrationOpen')) ?? true;
             console.log('📋 Registration status loaded:', registrationOpen);
             
+            // Check if admin was previously logged in
+            const wasAdminLoggedIn = JSON.parse(localStorage.getItem('isAdminLoggedIn')) || false;
+            console.log('🔐 Previous admin session:', wasAdminLoggedIn);
+            
             // Update UI based on registration status immediately
             updateRegistrationStatus();
             
@@ -1843,8 +1870,30 @@
                 updateRegistrationStatus();
             }
             
+            // Restore admin session if previously logged in
+            if (wasAdminLoggedIn) {
+                console.log('🔄 Restoring admin session...');
+                isAdminLoggedIn = true;
+                
+                // Show statistics page
+                if (mainContent) mainContent.style.display = 'none';
+                if (statisticsPage) {
+                    statisticsPage.classList.remove('hidden');
+                    statisticsPage.style.display = 'block';
+                }
+                
+                // Start auto-refresh for admin
+                startAutoRefresh();
+                
+                // Update registration status for admin view
+                updateRegistrationStatus();
+                
+                console.log('✅ Admin session restored successfully');
+            }
+            
             console.log('✅ Aplikasi siap dengan', registrations.length, 'pendaftaran');
             console.log('🔒 Registration status:', registrationOpen ? 'OPEN' : 'CLOSED');
+            console.log('👤 Admin status:', isAdminLoggedIn ? 'LOGGED IN' : 'LOGGED OUT');
         }
         
         // Initialize on page load
@@ -2157,6 +2206,37 @@
                 adminPassword = 'admin123';
                 localStorage.setItem('adminPassword', adminPassword);
                 alert('✅ Kata laluan telah direset ke "admin123"');
+            }
+        });
+        
+        // Logout Admin
+        document.getElementById('logoutAdminBtn').addEventListener('click', function() {
+            if (confirm('🚪 Adakah anda pasti mahu log keluar dari panel admin?')) {
+                console.log('🚪 Admin logout initiated');
+                
+                // Clear admin session
+                isAdminLoggedIn = false;
+                localStorage.setItem('isAdminLoggedIn', JSON.stringify(false));
+                
+                // Stop auto-refresh
+                stopAutoRefresh();
+                
+                // Hide statistics page and show main content
+                if (statisticsPage) {
+                    statisticsPage.classList.add('hidden');
+                    statisticsPage.style.display = 'none';
+                }
+                if (mainContent) {
+                    mainContent.style.display = 'block';
+                }
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Show logout confirmation
+                showTemporaryMessage('✅ Anda telah berjaya log keluar dari panel admin', 'success');
+                
+                console.log('✅ Admin logout completed');
             }
         });
         
@@ -2533,5 +2613,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988e08861719e708',t:'MTc1OTUxMTIyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988e0fbcd037e708',t:'MTc1OTUxMTUxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
