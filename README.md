@@ -1,1 +1,1143 @@
-# Sains
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borang Pendaftaran - Kelas Persediaan Akhir UASA Sains</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-8">
+    <div class="max-w-2xl mx-auto px-4">
+        <!-- Main Form Content -->
+        <div id="mainContent">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-bold text-indigo-800 mb-2">Kelas Persediaan Akhir UASA</h1>
+                    <h2 class="text-xl font-semibold text-indigo-600">Subjek: Sains</h2>
+                </div>
+                
+                <!-- Compact Info Section -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-6">
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div class="flex items-center">
+                            <span class="text-lg mr-2">👨‍🏫</span>
+                            <span class="text-gray-700">Cikgu Khairul 
+                                <a href="https://wa.me/60126866412" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 font-medium inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                                    </svg>
+                                    0126866412
+                                </a>
+                            </span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-lg mr-2">🗓</span>
+                            <span class="text-gray-700">04 Oktober 2025 (Sabtu)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-lg mr-2">🏫</span>
+                            <span class="text-gray-700">Kelas 4 Ibnu Sina</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-lg mr-2">💰</span>
+                            <span class="text-gray-700">RM10 (cash) + bahan</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-green-100 rounded-lg border border-green-200">
+                        <p class="text-green-800 font-medium text-sm text-center">
+                            📝 Sila isi nama sebelum jam 5 ptg • 📑 Bawa alat tulis & buku teks
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-gray-600 font-medium">Sila lengkapkan borang pendaftaran di bawah</p>
+                </div>
+            </div>
+
+            <!-- Registration Closed Message (Hidden by default) -->
+            <div id="registrationClosedMessage" class="hidden bg-red-50 border border-red-200 rounded-lg shadow-xl p-8 border border-red-100">
+                <div class="text-center">
+                    <div class="bg-red-100 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                        <svg class="w-8 h-8 text-red-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-red-800 mb-4">❌ Pendaftaran Ditutup</h3>
+                    <div class="bg-red-100 rounded-lg p-6 mb-6">
+                        <p class="text-red-800 font-medium text-lg leading-relaxed">
+                            Terima Kasih semua. Slot kelas terpaksa di tutup kerana bilangan murid melebihi had yang dirancang.
+                        </p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-red-600 font-medium">Untuk sebarang pertanyaan, sila hubungi:</p>
+                        <a href="https://wa.me/60126866412?text=Assalamualaikum%20Cikgu%20Khairul,%20saya%20ingin%20bertanya%20mengenai%20Kelas%20Persediaan%20Akhir%20UASA%20Sains." target="_blank" rel="noopener noreferrer" class="inline-flex items-center mt-3 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                            </svg>
+                            Cikgu Khairul - 0126866412
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div id="registrationFormContainer" class="bg-gradient-to-br from-white to-blue-50 rounded-lg shadow-xl p-8 border border-blue-100">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-indigo-800 mb-2">📝 Borang Pendaftaran</h3>
+                    <div class="w-20 h-1 bg-gradient-to-r from-indigo-500 to-blue-500 mx-auto rounded-full"></div>
+                </div>
+                <form id="registrationForm" class="space-y-6">
+                    <!-- Nama Murid -->
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <span class="mr-2">👤</span>
+                            Nama Murid * <span class="text-xs text-gray-500 ml-2">(Huruf besar sahaja)</span>
+                        </label>
+                        <input type="text" id="namaInput" required class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:shadow-md" placeholder="Masukkan nama penuh murid (HURUF BESAR)">
+                        <div class="absolute left-3 top-12 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <div id="namaError" class="hidden mt-2 text-red-600 text-sm flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            Nama mesti dalam huruf besar sahaja!
+                        </div>
+                    </div>
+
+                    <!-- Kelas -->
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <span class="mr-2">🏫</span>
+                            Kelas *
+                        </label>
+                        <select required class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:shadow-md appearance-none bg-white">
+                            <option value="">Pilih kelas</option>
+                            <option value="4IB">4IB</option>
+                            <option value="4IH">4IH</option>
+                            <option value="4IK">4IK</option>
+                            <option value="4IM">4IM</option>
+                            <option value="4IS">4IS</option>
+                        </select>
+                        <div class="absolute left-3 top-12 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                        <div class="absolute right-3 top-12 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Slot Masa -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <span class="mr-2">⏰</span>
+                            Slot Masa *
+                        </label>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <div class="flex items-start">
+                                <span class="text-xl mr-2 mt-1">ℹ️</span>
+                                <div>
+                                    <p class="text-blue-800 font-medium text-sm">Murid dibenarkan pilih 1 sahaja. Ini bagi memberi peluang kepada murid lain dan mengelakkan bilangan murid terlalu ramai dalam satu sesi.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-4 border-2 border-gray-300 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-indigo-300">
+                                <input type="radio" name="slot_masa" value="8.00-9.15 pagi" required class="text-indigo-600 focus:ring-indigo-500 mr-4 w-5 h-5">
+                                <div class="flex items-center">
+                                    <span class="text-2xl mr-3">🌅</span>
+                                    <div>
+                                        <span class="font-semibold text-gray-900 text-lg">8.00 - 9.15 pagi</span>
+                                        <p class="text-sm text-gray-600">Slot pagi awal</p>
+                                    </div>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-center p-4 border-2 border-gray-300 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-indigo-300">
+                                <input type="radio" name="slot_masa" value="9.30-10.45 pagi" required class="text-indigo-600 focus:ring-indigo-500 mr-4 w-5 h-5">
+                                <div class="flex items-center">
+                                    <span class="text-2xl mr-3">☀️</span>
+                                    <div>
+                                        <span class="font-semibold text-gray-900 text-lg">9.30 - 10.45 pagi</span>
+                                        <p class="text-sm text-gray-600">Slot pagi lewat</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- No Telefon Ibu/Ayah -->
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <span class="mr-2">📞</span>
+                            No. Telefon Ibu/Ayah *
+                        </label>
+                        <input type="tel" required pattern="[0-9]{10,11}" class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:shadow-md" placeholder="cth: 0123456789">
+                        <div class="absolute left-3 top-12 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-center pt-8">
+                        <button type="submit" class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-4 px-10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105 flex items-center space-x-2">
+                            <span>📝</span>
+                            <span>Hantar Pendaftaran</span>
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Admin Access (Hidden by default) -->
+            <div class="text-center mt-6">
+                <button id="adminAccessBtn" class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 text-sm opacity-50 hover:opacity-100">
+                    🔐 Admin
+                </button>
+            </div>
+
+            <!-- Admin Login Modal (Hidden by default) -->
+            <div id="adminModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">🔐 Admin Access</h3>
+                        <p class="text-gray-600">Masukkan kata laluan untuk akses statistik</p>
+                    </div>
+                    
+                    <form id="adminLoginForm" class="space-y-4">
+                        <div class="relative">
+                            <input type="password" id="adminPassword" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200" placeholder="Kata laluan admin">
+                            <div id="passwordError" class="hidden mt-2 text-red-600 text-sm">
+                                ❌ Kata laluan salah! Cuba lagi.
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                                Masuk
+                            </button>
+                            <button type="button" id="cancelAdminBtn" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Success Message (Hidden by default) -->
+            <div id="successMessage" class="hidden bg-green-50 border border-green-200 rounded-lg p-6 mt-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-green-100 rounded-full p-2 mr-4">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-green-800">Pendaftaran Berjaya!</h3>
+                        <p class="text-green-700">Terima kasih! Pendaftaran untuk Kelas Persediaan Akhir UASA - Sains telah diterima dan disimpan ke Google Sheets.</p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button id="daftarBaharu" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center mx-auto">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Daftar Baharu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Page (Hidden by default) -->
+        <div id="statisticsPage" class="hidden">
+            <!-- Statistics Header -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-bold text-purple-800 mb-2">📊 Statistik Pendaftaran</h1>
+                    <h2 class="text-xl font-semibold text-purple-600">Kelas Persediaan Akhir UASA - Sains</h2>
+                </div>
+                
+                <div class="text-center">
+                    <button id="backToFormBtn" class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center mx-auto space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span>Kembali ke Borang</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Dashboard -->
+            <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg shadow-lg p-6 border border-purple-200">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-bold text-purple-800 mb-2 flex items-center justify-center">
+                        <span class="mr-3">📈</span>
+                        Data Pendaftaran Murid
+                    </h3>
+                    <div class="w-20 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 mx-auto rounded-full"></div>
+                </div>
+                
+                <!-- Total Registered -->
+                <div class="bg-white rounded-lg p-4 mb-6 shadow-md border border-purple-100">
+                    <div class="flex items-center justify-center">
+                        <div class="bg-purple-100 rounded-full p-3 mr-4">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-3xl font-bold text-purple-800" id="totalRegistered">0</p>
+                            <p class="text-purple-600 font-medium">Jumlah Murid Daftar</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slot Statistics -->
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <!-- Slot 1 -->
+                    <div class="bg-white rounded-lg p-6 shadow-md border border-orange-200 hover:shadow-lg transition-shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-orange-100 rounded-full p-3 mr-4">
+                                <span class="text-2xl">🌅</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-orange-800">Slot Pagi Awal</h4>
+                                <p class="text-orange-600 text-sm">8.00 - 9.15 pagi</p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-3xl font-bold text-orange-700" id="slot1Count">0</p>
+                            <p class="text-orange-600 font-medium">murid daftar</p>
+                        </div>
+                        <div class="mt-4">
+                            <div class="bg-orange-200 rounded-full h-3">
+                                <div class="bg-gradient-to-r from-orange-400 to-orange-500 h-3 rounded-full transition-all duration-500" id="slot1Progress" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-orange-600 mt-1 text-center" id="slot1Percentage">0% daripada jumlah</p>
+                        </div>
+                    </div>
+
+                    <!-- Slot 2 -->
+                    <div class="bg-white rounded-lg p-6 shadow-md border border-yellow-200 hover:shadow-lg transition-shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-yellow-100 rounded-full p-3 mr-4">
+                                <span class="text-2xl">☀️</span>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-yellow-800">Slot Pagi Lewat</h4>
+                                <p class="text-yellow-600 text-sm">9.30 - 10.45 pagi</p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-3xl font-bold text-yellow-700" id="slot2Count">0</p>
+                            <p class="text-yellow-600 font-medium">murid daftar</p>
+                        </div>
+                        <div class="mt-4">
+                            <div class="bg-yellow-200 rounded-full h-3">
+                                <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 h-3 rounded-full transition-all duration-500" id="slot2Progress" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-yellow-600 mt-1 text-center" id="slot2Percentage">0% daripada jumlah</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Class Breakdown -->
+                <div class="bg-white rounded-lg p-6 mb-6 shadow-md border border-purple-100">
+                    <h4 class="text-lg font-bold text-purple-800 mb-4 flex items-center">
+                        <span class="mr-2">🏫</span>
+                        Pecahan Mengikut Kelas
+                        <span class="text-sm text-purple-600 ml-2 font-normal">(Klik untuk lihat senarai murid)</span>
+                    </h4>
+                    <div class="grid grid-cols-5 gap-3" id="classBreakdown">
+                        <div class="text-center p-3 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 cursor-pointer transition-all duration-200 hover:shadow-md transform hover:scale-105" onclick="showClassStudents('4IB')">
+                            <p class="font-bold text-purple-800">4IB</p>
+                            <p class="text-2xl font-bold text-purple-600" id="class4IB">0</p>
+                            <p class="text-xs text-purple-500 mt-1">👆 Klik lihat</p>
+                        </div>
+                        <div class="text-center p-3 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 cursor-pointer transition-all duration-200 hover:shadow-md transform hover:scale-105" onclick="showClassStudents('4IH')">
+                            <p class="font-bold text-purple-800">4IH</p>
+                            <p class="text-2xl font-bold text-purple-600" id="class4IH">0</p>
+                            <p class="text-xs text-purple-500 mt-1">👆 Klik lihat</p>
+                        </div>
+                        <div class="text-center p-3 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 cursor-pointer transition-all duration-200 hover:shadow-md transform hover:scale-105" onclick="showClassStudents('4IK')">
+                            <p class="font-bold text-purple-800">4IK</p>
+                            <p class="text-2xl font-bold text-purple-600" id="class4IK">0</p>
+                            <p class="text-xs text-purple-500 mt-1">👆 Klik lihat</p>
+                        </div>
+                        <div class="text-center p-3 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 cursor-pointer transition-all duration-200 hover:shadow-md transform hover:scale-105" onclick="showClassStudents('4IM')">
+                            <p class="font-bold text-purple-800">4IM</p>
+                            <p class="text-2xl font-bold text-purple-600" id="class4IM">0</p>
+                            <p class="text-xs text-purple-500 mt-1">👆 Klik lihat</p>
+                        </div>
+                        <div class="text-center p-3 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 cursor-pointer transition-all duration-200 hover:shadow-md transform hover:scale-105" onclick="showClassStudents('4IS')">
+                            <p class="font-bold text-purple-800">4IS</p>
+                            <p class="text-2xl font-bold text-purple-600" id="class4IS">0</p>
+                            <p class="text-xs text-purple-500 mt-1">👆 Klik lihat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registered Students List -->
+                <div class="bg-white rounded-lg p-6 shadow-md border border-purple-100">
+                    <h4 class="text-lg font-bold text-purple-800 mb-4 flex items-center">
+                        <span class="mr-2">📋</span>
+                        Senarai Murid Daftar
+                    </h4>
+                    <div id="studentsList" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">Tiada pendaftaran lagi</p>
+                    </div>
+                </div>
+
+                <!-- Admin Controls -->
+                <div class="bg-white rounded-lg p-6 mb-6 shadow-md border border-purple-100">
+                    <h4 class="text-lg font-bold text-purple-800 mb-4 flex items-center">
+                        <span class="mr-2">⚙️</span>
+                        Kawalan Admin
+                    </h4>
+                    
+                    <!-- Registration Status Control -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 rounded-full p-2 mr-3">
+                                    <span class="text-xl" id="registrationStatusIcon">✅</span>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-purple-800">Status Pendaftaran</h5>
+                                    <p class="text-sm text-purple-600" id="registrationStatusText">Pendaftaran dibuka</p>
+                                </div>
+                            </div>
+                            <button id="toggleRegistrationBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                                Tutup Pendaftaran
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Password Management -->
+                    <div class="mb-4">
+                        <h5 class="font-semibold text-purple-800 mb-3 flex items-center">
+                            <span class="mr-2">🔑</span>
+                            Pengurusan Kata Laluan
+                        </h5>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <button id="changePasswordBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                                Tukar Kata Laluan
+                            </button>
+                            <button id="resetPasswordBtn" class="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Reset ke Default
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Last Updated -->
+                <div class="text-center mt-6">
+                    <p class="text-sm text-purple-600">
+                        <span class="mr-1">🕒</span>
+                        Dikemaskini: <span id="lastUpdated">-</span>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Class Students Modal -->
+            <div id="classStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 shadow-2xl max-h-[80vh] overflow-y-auto">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold text-purple-800 mb-2 flex items-center justify-center">
+                            <span class="mr-2">🏫</span>
+                            <span id="classModalTitle">Senarai Murid Kelas</span>
+                        </h3>
+                        <div class="w-20 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 mx-auto rounded-full"></div>
+                    </div>
+                    
+                    <!-- Class Summary -->
+                    <div class="bg-purple-50 rounded-lg p-4 mb-6 border border-purple-200">
+                        <div class="grid md:grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="text-2xl font-bold text-purple-800" id="classModalTotal">0</p>
+                                <p class="text-purple-600 text-sm">Jumlah Murid</p>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-orange-700" id="classModalSlot1">0</p>
+                                <p class="text-orange-600 text-sm">Slot 8.00-9.15</p>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-yellow-700" id="classModalSlot2">0</p>
+                                <p class="text-yellow-600 text-sm">Slot 9.30-10.45</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Students List -->
+                    <div id="classStudentsList" class="space-y-3 mb-6">
+                        <!-- Students will be populated here -->
+                    </div>
+                    
+                    <div class="text-center">
+                        <button id="closeClassModalBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Password Modal -->
+            <div id="changePasswordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">🔑 Tukar Kata Laluan</h3>
+                        <p class="text-gray-600">Masukkan kata laluan baharu untuk admin</p>
+                    </div>
+                    
+                    <form id="changePasswordForm" class="space-y-4">
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kata Laluan Semasa</label>
+                            <input type="password" id="currentPassword" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200" placeholder="Masukkan kata laluan semasa">
+                            <div id="currentPasswordError" class="hidden mt-2 text-red-600 text-sm">
+                                ❌ Kata laluan semasa salah!
+                            </div>
+                        </div>
+                        
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kata Laluan Baharu</label>
+                            <input type="password" id="newPassword" required minlength="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200" placeholder="Masukkan kata laluan baharu (min 6 aksara)">
+                        </div>
+                        
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sahkan Kata Laluan Baharu</label>
+                            <input type="password" id="confirmPassword" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200" placeholder="Sahkan kata laluan baharu">
+                            <div id="confirmPasswordError" class="hidden mt-2 text-red-600 text-sm">
+                                ❌ Kata laluan tidak sepadan!
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-3 pt-4">
+                            <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                                Simpan
+                            </button>
+                            <button type="button" id="cancelChangePasswordBtn" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Local storage for registration data
+        let registrations = JSON.parse(localStorage.getItem('uasaRegistrations')) || [];
+
+        // Admin system
+        let adminPassword = localStorage.getItem('adminPassword') || 'admin123';
+        let isAdminLoggedIn = false;
+        let registrationOpen = JSON.parse(localStorage.getItem('registrationOpen')) ?? true;
+        
+        // Page navigation
+        const mainContent = document.getElementById('mainContent');
+        const statisticsPage = document.getElementById('statisticsPage');
+        const adminAccessBtn = document.getElementById('adminAccessBtn');
+        const adminModal = document.getElementById('adminModal');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        const cancelAdminBtn = document.getElementById('cancelAdminBtn');
+        const backToFormBtn = document.getElementById('backToFormBtn');
+
+        // Show admin login modal
+        adminAccessBtn.addEventListener('click', function() {
+            adminModal.classList.remove('hidden');
+            document.getElementById('adminPassword').focus();
+        });
+
+        // Cancel admin login
+        cancelAdminBtn.addEventListener('click', function() {
+            adminModal.classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('passwordError').classList.add('hidden');
+        });
+
+        // Close modal when clicking outside
+        adminModal.addEventListener('click', function(e) {
+            if (e.target === adminModal) {
+                adminModal.classList.add('hidden');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('passwordError').classList.add('hidden');
+            }
+        });
+
+        // Admin login form
+        adminLoginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const enteredPassword = document.getElementById('adminPassword').value;
+            const passwordError = document.getElementById('passwordError');
+            
+            if (enteredPassword === adminPassword) {
+                // Correct password
+                isAdminLoggedIn = true;
+                adminModal.classList.add('hidden');
+                
+                // Show statistics page
+                mainContent.style.display = 'none';
+                statisticsPage.classList.remove('hidden');
+                statisticsPage.style.display = 'block';
+                
+                // Update statistics and student list
+                updateStatistics();
+                updateStudentsList();
+                updateRegistrationStatus();
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Clear form
+                document.getElementById('adminPassword').value = '';
+                passwordError.classList.add('hidden');
+            } else {
+                // Wrong password
+                passwordError.classList.remove('hidden');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        });
+
+        // Back to form
+        backToFormBtn.addEventListener('click', function() {
+            statisticsPage.classList.add('hidden');
+            statisticsPage.style.display = 'none';
+            mainContent.style.display = 'block';
+            
+            // Reset admin login status
+            isAdminLoggedIn = false;
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Update students list
+        function updateStudentsList() {
+            const studentsList = document.getElementById('studentsList');
+            
+            if (registrations.length === 0) {
+                studentsList.innerHTML = '<p class="text-gray-500 text-center py-4">Tiada pendaftaran lagi</p>';
+                return;
+            }
+            
+            const studentsHTML = registrations.map((student, index) => `
+                <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors">
+                    <div class="flex items-center">
+                        <div class="bg-purple-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                            <span class="text-purple-600 font-bold text-sm">${index + 1}</span>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-purple-800">${student.nama}</p>
+                            <p class="text-sm text-purple-600">${student.kelas} • ${student.slotMasa}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-purple-500">${student.timestamp}</p>
+                        <p class="text-xs text-purple-600">${student.telefon}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            studentsList.innerHTML = studentsHTML;
+        }
+
+        // Update statistics display
+        function updateStatistics() {
+            const slot1Count = registrations.filter(r => r.slotMasa === '8.00-9.15 pagi').length;
+            const slot2Count = registrations.filter(r => r.slotMasa === '9.30-10.45 pagi').length;
+            const totalCount = registrations.length;
+
+            // Update totals
+            document.getElementById('totalRegistered').textContent = totalCount;
+            document.getElementById('slot1Count').textContent = slot1Count;
+            document.getElementById('slot2Count').textContent = slot2Count;
+
+            // Update percentages and progress bars
+            if (totalCount > 0) {
+                const slot1Percentage = Math.round((slot1Count / totalCount) * 100);
+                const slot2Percentage = Math.round((slot2Count / totalCount) * 100);
+                
+                document.getElementById('slot1Percentage').textContent = `${slot1Percentage}% daripada jumlah`;
+                document.getElementById('slot2Percentage').textContent = `${slot2Percentage}% daripada jumlah`;
+                
+                document.getElementById('slot1Progress').style.width = `${slot1Percentage}%`;
+                document.getElementById('slot2Progress').style.width = `${slot2Percentage}%`;
+            } else {
+                document.getElementById('slot1Percentage').textContent = '0% daripada jumlah';
+                document.getElementById('slot2Percentage').textContent = '0% daripada jumlah';
+                document.getElementById('slot1Progress').style.width = '0%';
+                document.getElementById('slot2Progress').style.width = '0%';
+            }
+
+            // Update class breakdown
+            const classes = ['4IB', '4IH', '4IK', '4IM', '4IS'];
+            classes.forEach(className => {
+                const classCount = registrations.filter(r => r.kelas === className).length;
+                document.getElementById(`class${className}`).textContent = classCount;
+            });
+
+            // Update last updated time
+            if (registrations.length > 0) {
+                const lastRegistration = registrations[registrations.length - 1];
+                document.getElementById('lastUpdated').textContent = lastRegistration.timestamp;
+            } else {
+                document.getElementById('lastUpdated').textContent = '-';
+            }
+        }
+
+        // Initialize statistics on page load
+        updateStatistics();
+        
+        // Initialize registration status on page load
+        updateRegistrationStatus();
+        
+        // Function to update registration status display
+        function updateRegistrationStatus() {
+            const registrationFormContainer = document.getElementById('registrationFormContainer');
+            const registrationClosedMessage = document.getElementById('registrationClosedMessage');
+            const adminAccessBtn = document.getElementById('adminAccessBtn');
+            
+            if (registrationOpen) {
+                registrationFormContainer.classList.remove('hidden');
+                registrationClosedMessage.classList.add('hidden');
+                adminAccessBtn.style.display = 'block';
+            } else {
+                registrationFormContainer.classList.add('hidden');
+                registrationClosedMessage.classList.remove('hidden');
+                adminAccessBtn.style.display = 'block'; // Admin can still access even when closed
+            }
+            
+            // Update admin panel status if in admin mode
+            if (isAdminLoggedIn) {
+                const statusIcon = document.getElementById('registrationStatusIcon');
+                const statusText = document.getElementById('registrationStatusText');
+                const toggleBtn = document.getElementById('toggleRegistrationBtn');
+                
+                if (registrationOpen) {
+                    statusIcon.textContent = '✅';
+                    statusText.textContent = 'Pendaftaran dibuka';
+                    toggleBtn.textContent = 'Tutup Pendaftaran';
+                    toggleBtn.className = 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors';
+                } else {
+                    statusIcon.textContent = '❌';
+                    statusText.textContent = 'Pendaftaran ditutup';
+                    toggleBtn.textContent = 'Buka Pendaftaran';
+                    toggleBtn.className = 'bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors';
+                }
+            }
+        }
+        
+        // Admin Controls Event Listeners
+        document.getElementById('toggleRegistrationBtn').addEventListener('click', function() {
+            registrationOpen = !registrationOpen;
+            localStorage.setItem('registrationOpen', JSON.stringify(registrationOpen));
+            updateRegistrationStatus();
+            
+            // Show confirmation message
+            const action = registrationOpen ? 'dibuka' : 'ditutup';
+            alert(`✅ Pendaftaran telah ${action} berjaya!`);
+        });
+        
+        // Change Password Modal
+        const changePasswordModal = document.getElementById('changePasswordModal');
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        const cancelChangePasswordBtn = document.getElementById('cancelChangePasswordBtn');
+        const changePasswordForm = document.getElementById('changePasswordForm');
+        
+        changePasswordBtn.addEventListener('click', function() {
+            changePasswordModal.classList.remove('hidden');
+            document.getElementById('currentPassword').focus();
+        });
+        
+        cancelChangePasswordBtn.addEventListener('click', function() {
+            changePasswordModal.classList.add('hidden');
+            changePasswordForm.reset();
+            document.getElementById('currentPasswordError').classList.add('hidden');
+            document.getElementById('confirmPasswordError').classList.add('hidden');
+        });
+        
+        // Close modal when clicking outside
+        changePasswordModal.addEventListener('click', function(e) {
+            if (e.target === changePasswordModal) {
+                changePasswordModal.classList.add('hidden');
+                changePasswordForm.reset();
+                document.getElementById('currentPasswordError').classList.add('hidden');
+                document.getElementById('confirmPasswordError').classList.add('hidden');
+            }
+        });
+        
+        // Change Password Form
+        changePasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const currentPasswordError = document.getElementById('currentPasswordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+            
+            // Reset errors
+            currentPasswordError.classList.add('hidden');
+            confirmPasswordError.classList.add('hidden');
+            
+            // Validate current password
+            if (currentPassword !== adminPassword) {
+                currentPasswordError.classList.remove('hidden');
+                document.getElementById('currentPassword').focus();
+                return;
+            }
+            
+            // Validate password confirmation
+            if (newPassword !== confirmPassword) {
+                confirmPasswordError.classList.remove('hidden');
+                document.getElementById('confirmPassword').focus();
+                return;
+            }
+            
+            // Update password
+            adminPassword = newPassword;
+            localStorage.setItem('adminPassword', adminPassword);
+            
+            // Close modal and show success
+            changePasswordModal.classList.add('hidden');
+            changePasswordForm.reset();
+            alert('✅ Kata laluan telah berjaya ditukar!');
+        });
+        
+        // Reset Password
+        document.getElementById('resetPasswordBtn').addEventListener('click', function() {
+            if (confirm('⚠️ Adakah anda pasti mahu reset kata laluan ke default "admin123"?')) {
+                adminPassword = 'admin123';
+                localStorage.setItem('adminPassword', adminPassword);
+                alert('✅ Kata laluan telah direset ke "admin123"');
+            }
+        });
+
+        // Class Students Modal Functions
+        const classStudentsModal = document.getElementById('classStudentsModal');
+        const closeClassModalBtn = document.getElementById('closeClassModalBtn');
+        
+        function showClassStudents(className) {
+            // Filter students by class
+            const classStudents = registrations.filter(student => student.kelas === className);
+            
+            // Update modal title
+            document.getElementById('classModalTitle').textContent = `Senarai Murid Kelas ${className}`;
+            
+            // Calculate statistics for this class
+            const totalStudents = classStudents.length;
+            const slot1Students = classStudents.filter(s => s.slotMasa === '8.00-9.15 pagi').length;
+            const slot2Students = classStudents.filter(s => s.slotMasa === '9.30-10.45 pagi').length;
+            
+            // Update summary
+            document.getElementById('classModalTotal').textContent = totalStudents;
+            document.getElementById('classModalSlot1').textContent = slot1Students;
+            document.getElementById('classModalSlot2').textContent = slot2Students;
+            
+            // Generate students list
+            const classStudentsList = document.getElementById('classStudentsList');
+            
+            if (totalStudents === 0) {
+                classStudentsList.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="bg-gray-100 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                            <span class="text-3xl">📚</span>
+                        </div>
+                        <p class="text-gray-500 font-medium">Tiada murid dari kelas ${className} yang mendaftar lagi</p>
+                    </div>
+                `;
+            } else {
+                // Group students by time slot
+                const slot1List = classStudents.filter(s => s.slotMasa === '8.00-9.15 pagi');
+                const slot2List = classStudents.filter(s => s.slotMasa === '9.30-10.45 pagi');
+                
+                let studentsHTML = '';
+                
+                // Slot 1 students
+                if (slot1List.length > 0) {
+                    studentsHTML += `
+                        <div class="mb-6">
+                            <div class="flex items-center mb-3">
+                                <span class="text-2xl mr-2">🌅</span>
+                                <h5 class="text-lg font-bold text-orange-800">Slot 8.00 - 9.15 pagi (${slot1List.length} murid)</h5>
+                            </div>
+                            <div class="space-y-2">
+                    `;
+                    
+                    slot1List.forEach((student, index) => {
+                        studentsHTML += `
+                            <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
+                                <div class="flex items-center">
+                                    <div class="bg-orange-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                        <span class="text-orange-600 font-bold text-sm">${index + 1}</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-orange-800">${student.nama}</p>
+                                        <p class="text-sm text-orange-600">${student.kelas}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-orange-500">${student.timestamp}</p>
+                                    <p class="text-xs text-orange-600">${student.telefon}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    studentsHTML += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Slot 2 students
+                if (slot2List.length > 0) {
+                    studentsHTML += `
+                        <div class="mb-4">
+                            <div class="flex items-center mb-3">
+                                <span class="text-2xl mr-2">☀️</span>
+                                <h5 class="text-lg font-bold text-yellow-800">Slot 9.30 - 10.45 pagi (${slot2List.length} murid)</h5>
+                            </div>
+                            <div class="space-y-2">
+                    `;
+                    
+                    slot2List.forEach((student, index) => {
+                        studentsHTML += `
+                            <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <div class="flex items-center">
+                                    <div class="bg-yellow-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                        <span class="text-yellow-600 font-bold text-sm">${index + 1}</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-yellow-800">${student.nama}</p>
+                                        <p class="text-sm text-yellow-600">${student.kelas}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-yellow-500">${student.timestamp}</p>
+                                    <p class="text-xs text-yellow-600">${student.telefon}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    studentsHTML += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                classStudentsList.innerHTML = studentsHTML;
+            }
+            
+            // Show modal
+            classStudentsModal.classList.remove('hidden');
+        }
+        
+        // Close class modal
+        closeClassModalBtn.addEventListener('click', function() {
+            classStudentsModal.classList.add('hidden');
+        });
+        
+        // Close modal when clicking outside
+        classStudentsModal.addEventListener('click', function(e) {
+            if (e.target === classStudentsModal) {
+                classStudentsModal.classList.add('hidden');
+            }
+        });
+
+        // Validate uppercase name input
+        document.getElementById('namaInput').addEventListener('input', function() {
+            const namaError = document.getElementById('namaError');
+            const value = this.value;
+            
+            if (value && value !== value.toUpperCase()) {
+                namaError.classList.remove('hidden');
+                this.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                this.classList.remove('border-gray-300', 'focus:ring-indigo-500', 'focus:border-indigo-500');
+            } else {
+                namaError.classList.add('hidden');
+                this.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                this.classList.add('border-gray-300', 'focus:ring-indigo-500', 'focus:border-indigo-500');
+            }
+        });
+
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate uppercase name
+            const namaInput = document.getElementById('namaInput');
+            const nama = namaInput.value;
+            
+            if (nama !== nama.toUpperCase()) {
+                document.getElementById('namaError').classList.remove('hidden');
+                namaInput.focus();
+                return;
+            }
+            
+            // Show loading state
+            const submitButton = document.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Menghantar...';
+            submitButton.disabled = true;
+            
+            // Get form data
+            const formData = new FormData(this);
+            const kelas = document.querySelector('select').value;
+            const slotMasa = formData.get('slot_masa');
+            const telefon = document.querySelector('input[type="tel"]').value;
+            const timestamp = new Date().toLocaleString('ms-MY', {
+                timeZone: 'Asia/Kuala_Lumpur',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // Prepare data for Google Sheets
+            const data = {
+                timestamp: timestamp,
+                nama: nama,
+                kelas: kelas,
+                slotMasa: slotMasa,
+                telefon: telefon
+            };
+            
+            // Save to local storage first
+            registrations.push(data);
+            localStorage.setItem('uasaRegistrations', JSON.stringify(registrations));
+            
+            // Update statistics immediately
+            updateStatistics();
+
+            // Send to Google Sheets
+            const googleScriptURL = 'https://script.google.com/macros/s/AKfycbxA_6cx4IbdodAmpAPll0c8IfsK-s3rwOeqnBL6bP2fqzmU2BJP8e084a3XnAz_XVsRLA/exec';
+            
+            fetch(googleScriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                // Hide form and show success message
+                this.style.display = 'none';
+                document.getElementById('successMessage').classList.remove('hidden');
+                
+                // Scroll to success message
+                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                
+                console.log('Data sent to Google Sheets:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                // Still show success message as no-cors mode doesn't return response
+                this.style.display = 'none';
+                document.getElementById('successMessage').classList.remove('hidden');
+                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+            })
+            .finally(() => {
+                // Reset button
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            });
+        });
+
+        // Reset form for new registration
+        document.getElementById('daftarBaharu').addEventListener('click', function() {
+            // Show form and hide success message
+            document.getElementById('registrationForm').style.display = 'block';
+            document.getElementById('successMessage').classList.add('hidden');
+            
+            // Reset form
+            document.getElementById('registrationForm').reset();
+            document.getElementById('namaError').classList.add('hidden');
+            
+            // Reset input styling
+            const namaInput = document.getElementById('namaInput');
+            namaInput.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+            namaInput.classList.add('border-gray-300', 'focus:ring-indigo-500', 'focus:border-indigo-500');
+            
+            // Reset radio button styling
+            const radioLabels = document.querySelectorAll('label:has(input[type="radio"])');
+            radioLabels.forEach(l => {
+                l.classList.remove('border-indigo-500', 'bg-indigo-50');
+            });
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Add interactive feedback
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('transform', 'scale-105');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('transform', 'scale-105');
+            });
+        });
+
+        // Add hover effects for radio buttons
+        const radioLabels = document.querySelectorAll('label:has(input[type="radio"])');
+        radioLabels.forEach(label => {
+            label.addEventListener('mouseenter', function() {
+                this.classList.add('border-indigo-300', 'bg-indigo-50');
+            });
+            
+            label.addEventListener('mouseleave', function() {
+                if (!this.querySelector('input').checked) {
+                    this.classList.remove('border-indigo-300', 'bg-indigo-50');
+                }
+            });
+            
+            const radio = label.querySelector('input[type="radio"]');
+            radio.addEventListener('change', function() {
+                // Remove selection styling from all labels
+                radioLabels.forEach(l => {
+                    l.classList.remove('border-indigo-500', 'bg-indigo-50');
+                });
+                
+                // Add selection styling to selected label
+                if (this.checked) {
+                    label.classList.add('border-indigo-500', 'bg-indigo-50');
+                }
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988a7f3e874be708',t:'MTc1OTQ3NDE0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
