@@ -849,8 +849,9 @@
                 
                 const csvText = await response.text();
                 console.log('📄 CSV data received, length:', csvText.length);
+                console.log('📄 Raw CSV content:', csvText.substring(0, 500) + '...');
                 
-                // Parse CSV data
+                // Parse CSV data with better handling
                 const lines = csvText.split('\n').filter(line => line.trim());
                 
                 if (lines.length <= 1) {
@@ -861,8 +862,9 @@
                     return true;
                 }
                 
-                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-                console.log('📋 CSV headers:', headers);
+                // Parse header
+                const headerLine = lines[0];
+                console.log('📋 Raw header line:', headerLine);
                 
                 const newRegistrations = [];
                 const newPaymentData = {};
@@ -873,8 +875,29 @@
                     if (!line) continue;
                     
                     try {
-                        // Simple CSV parsing - split by comma and clean quotes
-                        const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                        console.log(`📝 Processing row ${i}:`, line);
+                        
+                        // Enhanced CSV parsing to handle quoted fields properly
+                        const values = [];
+                        let currentValue = '';
+                        let insideQuotes = false;
+                        
+                        for (let j = 0; j < line.length; j++) {
+                            const char = line[j];
+                            
+                            if (char === '"') {
+                                insideQuotes = !insideQuotes;
+                            } else if (char === ',' && !insideQuotes) {
+                                values.push(currentValue.trim());
+                                currentValue = '';
+                            } else {
+                                currentValue += char;
+                            }
+                        }
+                        // Add the last value
+                        values.push(currentValue.trim());
+                        
+                        console.log(`📊 Parsed values for row ${i}:`, values);
                         
                         if (values.length >= 5) {
                             const registration = {
@@ -885,9 +908,12 @@
                                 telefon: values[4] || ''
                             };
                             
+                            console.log(`🎯 Registration object for row ${i}:`, registration);
+                            
                             // Only add if required fields are present
                             if (registration.nama && registration.kelas && registration.slotMasa) {
                                 newRegistrations.push(registration);
+                                console.log(`✅ Added registration: ${registration.nama} - ${registration.kelas} - ${registration.slotMasa}`);
                                 
                                 // Load payment and attendance data from columns 6 and 7 (G and H)
                                 const studentId = `${registration.nama}_${registration.kelas}_${registration.timestamp}`;
@@ -898,14 +924,22 @@
                                     paid: bayaranStatus.toUpperCase() === 'SUDAH',
                                     present: kehadiranStatus.toUpperCase() === 'HADIR'
                                 };
+                                
+                                console.log(`💰 Payment data for ${registration.nama}: paid=${newPaymentData[studentId].paid}, present=${newPaymentData[studentId].present}`);
+                            } else {
+                                console.log(`⚠️ Skipping row ${i} - missing required fields:`, registration);
                             }
+                        } else {
+                            console.log(`⚠️ Skipping row ${i} - insufficient columns (${values.length}):`, values);
                         }
                     } catch (rowError) {
                         console.warn('⚠️ Error parsing row', i, ':', rowError.message);
+                        console.warn('⚠️ Problematic line:', line);
                     }
                 }
                 
                 console.log('✅ Processing complete:', newRegistrations.length, 'registrations');
+                console.log('📊 Final registrations:', newRegistrations);
                 
                 // Update global variables and local storage
                 registrations = newRegistrations;
@@ -1242,44 +1276,117 @@
                 return;
             }
             
-            const studentsHTML = filteredStudents.map((student, index) => {
-                const studentId = `${student.nama}_${student.kelas}_${student.timestamp}`;
-                const payment = paymentData[studentId] || { paid: false, present: false };
+            // Group students by class and slot for better organization
+            const groupedStudents = {};
+            
+            filteredStudents.forEach(student => {
+                const classKey = student.kelas;
+                const slotKey = student.slotMasa;
                 
-                return `
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition-all duration-200">
-                        <div class="flex items-center">
-                            <div class="bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center mr-3">
-                                <span class="text-gray-600 font-bold text-xs">${index + 1}</span>
+                if (!groupedStudents[classKey]) {
+                    groupedStudents[classKey] = {};
+                }
+                if (!groupedStudents[classKey][slotKey]) {
+                    groupedStudents[classKey][slotKey] = [];
+                }
+                
+                groupedStudents[classKey][slotKey].push(student);
+            });
+            
+            // Generate HTML with grouping
+            let studentsHTML = '';
+            let globalIndex = 0;
+            
+            // Sort classes
+            const sortedClasses = Object.keys(groupedStudents).sort();
+            
+            sortedClasses.forEach(className => {
+                const classData = groupedStudents[className];
+                const classTotal = Object.values(classData).reduce((sum, students) => sum + students.length, 0);
+                
+                // Class header
+                studentsHTML += `
+                    <div class="mb-4">
+                        <div class="bg-purple-100 border border-purple-200 rounded-lg p-3 mb-3">
+                            <h5 class="font-bold text-purple-800 flex items-center">
+                                <span class="mr-2">🏫</span>
+                                Kelas ${className} (${classTotal} murid)
+                            </h5>
+                        </div>
+                `;
+                
+                // Sort slots within class
+                const sortedSlots = Object.keys(classData).sort();
+                
+                sortedSlots.forEach(slotTime => {
+                    const students = classData[slotTime];
+                    
+                    // Slot subheader
+                    const slotIcon = slotTime.includes('8.00') ? '🌅' : '☀️';
+                    const slotColor = slotTime.includes('8.00') ? 'orange' : 'yellow';
+                    
+                    studentsHTML += `
+                        <div class="mb-3 ml-4">
+                            <div class="bg-${slotColor}-50 border border-${slotColor}-200 rounded-lg p-2 mb-2">
+                                <h6 class="font-semibold text-${slotColor}-800 text-sm flex items-center">
+                                    <span class="mr-2">${slotIcon}</span>
+                                    ${slotTime} (${students.length} murid)
+                                </h6>
                             </div>
-                            <div>
-                                <p class="font-medium text-gray-800 text-sm">${student.nama}</p>
-                                <p class="text-xs text-gray-500">${student.kelas}</p>
+                            <div class="space-y-2 ml-4">
+                    `;
+                    
+                    // Students in this slot
+                    students.forEach(student => {
+                        globalIndex++;
+                        const studentId = `${student.nama}_${student.kelas}_${student.timestamp}`;
+                        const payment = paymentData[studentId] || { paid: false, present: false };
+                        
+                        studentsHTML += `
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition-all duration-200">
+                                <div class="flex items-center">
+                                    <div class="bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center mr-3">
+                                        <span class="text-gray-600 font-bold text-xs">${globalIndex}</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800 text-sm">${student.nama}</p>
+                                        <p class="text-xs text-gray-500">${student.kelas} • ${student.slotMasa}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-6">
+                                    <!-- Payment Slide Toggle -->
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs text-gray-600 font-medium">💰</span>
+                                        <label class="slide-toggle payment">
+                                            <input type="checkbox" id="payment_${studentId}" ${payment.paid ? 'checked' : ''} 
+                                                   onchange="togglePayment('${studentId}')">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <!-- Attendance Slide Toggle -->
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs text-gray-600 font-medium">🎯</span>
+                                        <label class="slide-toggle attendance">
+                                            <input type="checkbox" id="attendance_${studentId}" ${payment.present ? 'checked' : ''} 
+                                                   onchange="toggleAttendance('${studentId}')">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    studentsHTML += `
                             </div>
                         </div>
-                        <div class="flex items-center space-x-6">
-                            <!-- Payment Slide Toggle -->
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs text-gray-600 font-medium">💰</span>
-                                <label class="slide-toggle payment">
-                                    <input type="checkbox" id="payment_${studentId}" ${payment.paid ? 'checked' : ''} 
-                                           onchange="togglePayment('${studentId}')">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <!-- Attendance Slide Toggle -->
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs text-gray-600 font-medium">🎯</span>
-                                <label class="slide-toggle attendance">
-                                    <input type="checkbox" id="attendance_${studentId}" ${payment.present ? 'checked' : ''} 
-                                           onchange="toggleAttendance('${studentId}')">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
+                    `;
+                });
+                
+                studentsHTML += `
                     </div>
                 `;
-            }).join('');
+            });
             
             paymentStudentsList.innerHTML = studentsHTML;
             
@@ -2426,5 +2533,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988dfb671736e708',t:'MTc1OTUxMDY4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988e08861719e708',t:'MTc1OTUxMTIyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
