@@ -52,7 +52,7 @@
                     
                     <div class="mt-4 p-3 bg-green-100 rounded-lg border border-green-200">
                         <p class="text-green-800 font-medium text-sm text-center">
-                            📝 Sila isi nama sebelum jam 6 ptg • 📑 Bawa alat tulis & buku teks
+                            📝 Sila isi nama sebelum jam 5 ptg • 📑 Bawa alat tulis & buku teks
                         </p>
                     </div>
                 </div>
@@ -413,6 +413,27 @@
                         Kawalan Admin
                     </h4>
                     
+                    <!-- Data Refresh Control -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-full p-2 mr-3">
+                                    <span class="text-xl">🔄</span>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-blue-800">Kemaskini Data</h5>
+                                    <p class="text-sm text-blue-600">Ambil data terkini dari Google Sheets</p>
+                                </div>
+                            </div>
+                            <button id="refreshDataBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                <span id="refreshBtnText">Refresh Data</span>
+                            </button>
+                        </div>
+                    </div>
+                    
                     <!-- Registration Status Control -->
                     <div class="mb-6">
                         <div class="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
@@ -558,6 +579,108 @@
         let isAdminLoggedIn = false;
         let registrationOpen = JSON.parse(localStorage.getItem('registrationOpen')) ?? true;
         
+        // Google Sheets configuration
+        const googleScriptURL = 'https://script.google.com/macros/s/AKfycbxA_6cx4IbdodAmpAPll0c8IfsK-s3rwOeqnBL6bP2fqzmU2BJP8e084a3XnAz_XVsRLA/exec';
+        
+        // Function to fetch data from Google Sheets
+        async function fetchRegistrationsFromGoogleSheets() {
+            try {
+                console.log('Mengambil data dari Google Sheets...');
+                const response = await fetch(`${googleScriptURL}?action=getData`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Data diterima dari Google Sheets:', data);
+                    
+                    if (data && Array.isArray(data)) {
+                        // Update local registrations with Google Sheets data
+                        registrations = data.map(row => ({
+                            timestamp: row.timestamp || row[0] || '',
+                            nama: row.nama || row[1] || '',
+                            kelas: row.kelas || row[2] || '',
+                            slotMasa: row.slotMasa || row[3] || '',
+                            telefon: row.telefon || row[4] || ''
+                        })).filter(reg => reg.nama); // Filter out empty entries
+                        
+                        // Save to local storage as backup
+                        localStorage.setItem('uasaRegistrations', JSON.stringify(registrations));
+                        
+                        console.log(`${registrations.length} pendaftaran diambil dari Google Sheets`);
+                        return true;
+                    }
+                } else {
+                    console.warn('Tidak dapat mengambil data dari Google Sheets, menggunakan data tempatan');
+                }
+            } catch (error) {
+                console.error('Ralat mengambil data dari Google Sheets:', error);
+                console.log('Menggunakan data tempatan sebagai sandaran');
+            }
+            return false;
+        }
+        
+        // Function to refresh data and update displays
+        async function refreshData() {
+            const refreshSuccess = await fetchRegistrationsFromGoogleSheets();
+            
+            // Update statistics and displays
+            updateStatistics();
+            updateStudentsList();
+            
+            // Show refresh status if in admin mode
+            if (isAdminLoggedIn) {
+                const statusMessage = refreshSuccess ? 
+                    '✅ Data dikemaskini dari Google Sheets' : 
+                    '⚠️ Menggunakan data tempatan';
+                
+                // Show temporary status message
+                showTemporaryMessage(statusMessage, refreshSuccess ? 'success' : 'warning');
+            }
+            
+            return refreshSuccess;
+        }
+        
+        // Function to show temporary status messages
+        function showTemporaryMessage(message, type = 'success') {
+            // Create message element
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            if (type === 'success') {
+                messageDiv.className += ' bg-green-100 border border-green-200 text-green-800';
+            } else if (type === 'warning') {
+                messageDiv.className += ' bg-yellow-100 border border-yellow-200 text-yellow-800';
+            } else {
+                messageDiv.className += ' bg-blue-100 border border-blue-200 text-blue-800';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="flex items-center">
+                    <span class="mr-2">${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                messageDiv.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                messageDiv.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(messageDiv);
+                }, 300);
+            }, 3000);
+        }
+        
         // Page navigation
         const mainContent = document.getElementById('mainContent');
         const statisticsPage = document.getElementById('statisticsPage');
@@ -590,7 +713,7 @@
         });
 
         // Admin login form
-        adminLoginForm.addEventListener('submit', function(e) {
+        adminLoginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const enteredPassword = document.getElementById('adminPassword').value;
@@ -606,9 +729,14 @@
                 statisticsPage.classList.remove('hidden');
                 statisticsPage.style.display = 'block';
                 
-                // Update statistics and student list
-                updateStatistics();
-                updateStudentsList();
+                // Refresh data from Google Sheets first
+                showTemporaryMessage('🔄 Mengambil data terkini...', 'info');
+                await refreshData();
+                
+                // Start auto-refresh for admin
+                startAutoRefresh();
+                
+                // Update registration status
                 updateRegistrationStatus();
                 
                 // Scroll to top
@@ -631,8 +759,9 @@
             statisticsPage.style.display = 'none';
             mainContent.style.display = 'block';
             
-            // Reset admin login status
+            // Reset admin login status and stop auto-refresh
             isAdminLoggedIn = false;
+            stopAutoRefresh();
             
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -712,11 +841,44 @@
             }
         }
 
-        // Initialize statistics on page load
-        updateStatistics();
+        // Initialize data on page load
+        async function initializeData() {
+            // Try to fetch fresh data from Google Sheets on page load
+            console.log('Memulakan aplikasi...');
+            await fetchRegistrationsFromGoogleSheets();
+            
+            // Update displays
+            updateStatistics();
+            updateRegistrationStatus();
+        }
         
-        // Initialize registration status on page load
-        updateRegistrationStatus();
+        // Initialize on page load
+        initializeData();
+        
+        // Auto-refresh data every 30 seconds when admin is logged in
+        let autoRefreshInterval;
+        
+        function startAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            autoRefreshInterval = setInterval(async () => {
+                if (isAdminLoggedIn) {
+                    console.log('Auto-refresh: Mengambil data terkini...');
+                    await fetchRegistrationsFromGoogleSheets();
+                    updateStatistics();
+                    updateStudentsList();
+                }
+            }, 30000); // 30 seconds
+        }
+        
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
         
         // Function to update registration status display
         function updateRegistrationStatus() {
@@ -838,6 +1000,47 @@
                 adminPassword = 'admin123';
                 localStorage.setItem('adminPassword', adminPassword);
                 alert('✅ Kata laluan telah direset ke "admin123"');
+            }
+        });
+        
+        // Refresh Data Button
+        document.getElementById('refreshDataBtn').addEventListener('click', async function() {
+            const refreshBtn = this;
+            const refreshBtnText = document.getElementById('refreshBtnText');
+            const originalText = refreshBtnText.textContent;
+            
+            // Show loading state
+            refreshBtn.disabled = true;
+            refreshBtnText.textContent = 'Mengambil...';
+            refreshBtn.querySelector('svg').classList.add('animate-spin');
+            
+            try {
+                // Refresh data from Google Sheets
+                const success = await refreshData();
+                
+                if (success) {
+                    refreshBtnText.textContent = 'Berjaya!';
+                    setTimeout(() => {
+                        refreshBtnText.textContent = originalText;
+                    }, 2000);
+                } else {
+                    refreshBtnText.textContent = 'Gagal';
+                    setTimeout(() => {
+                        refreshBtnText.textContent = originalText;
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                refreshBtnText.textContent = 'Ralat';
+                setTimeout(() => {
+                    refreshBtnText.textContent = originalText;
+                }, 2000);
+            } finally {
+                // Reset button state
+                setTimeout(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.querySelector('svg').classList.remove('animate-spin');
+                }, 2000);
             }
         });
 
@@ -1040,8 +1243,7 @@
             // Update statistics immediately
             updateStatistics();
 
-            // Send to Google Sheets
-            const googleScriptURL = 'https://script.google.com/macros/s/AKfycbxA_6cx4IbdodAmpAPll0c8IfsK-s3rwOeqnBL6bP2fqzmU2BJP8e084a3XnAz_XVsRLA/exec';
+            // Send to Google Sheets (using the same URL as configured above)
             
             fetch(googleScriptURL, {
                 method: 'POST',
@@ -1139,5 +1341,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988a7f3e874be708',t:'MTc1OTQ3NDE0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988b8f4fe59ee708',t:'MTc1OTQ4NTI4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
