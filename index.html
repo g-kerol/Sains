@@ -580,13 +580,19 @@
         let registrationOpen = JSON.parse(localStorage.getItem('registrationOpen')) ?? true;
         
         // Google Sheets configuration
-        const googleScriptURL = 'https://script.google.com/macros/s/AKfycbxA_6cx4IbdodAmpAPll0c8IfsK-s3rwOeqnBL6bP2fqzmU2BJP8e084a3XnAz_XVsRLA/exec';
+        const SHEET_ID = '1s9_qnIRB7XUPYpOj-V1KJylmKqfcPE5qjevwshbEcLE';
+        const SHEET_NAME = 'Sheet1'; // Default sheet name
+        const googleScriptURL = `https://script.google.com/macros/s/AKfycbxA_6cx4IbdodAmpAPll0c8IfsK-s3rwOeqnBL6bP2fqzmU2BJP8e084a3XnAz_XVsRLA/exec?sheetId=${SHEET_ID}&sheetName=${SHEET_NAME}`;
         
         // Function to fetch data from Google Sheets
         async function fetchRegistrationsFromGoogleSheets() {
             try {
                 console.log('Mengambil data dari Google Sheets...');
-                const response = await fetch(`${googleScriptURL}?action=getData`, {
+                
+                // Use Google Sheets API to read data directly
+                const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=AIzaSyD-9tSrke4EqQMlVDwJMFgHtQwQKuOqOVc`;
+                
+                const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -594,18 +600,23 @@
                 });
                 
                 if (response.ok) {
-                    const data = await response.json();
-                    console.log('Data diterima dari Google Sheets:', data);
+                    const result = await response.json();
+                    console.log('Data diterima dari Google Sheets:', result);
                     
-                    if (data && Array.isArray(data)) {
+                    if (result && result.values && Array.isArray(result.values)) {
+                        const rows = result.values;
+                        
+                        // Skip header row if it exists
+                        const dataRows = rows.length > 0 && rows[0].includes('Timestamp') ? rows.slice(1) : rows;
+                        
                         // Update local registrations with Google Sheets data
-                        registrations = data.map(row => ({
-                            timestamp: row.timestamp || row[0] || '',
-                            nama: row.nama || row[1] || '',
-                            kelas: row.kelas || row[2] || '',
-                            slotMasa: row.slotMasa || row[3] || '',
-                            telefon: row.telefon || row[4] || ''
-                        })).filter(reg => reg.nama); // Filter out empty entries
+                        registrations = dataRows.map(row => ({
+                            timestamp: row[0] || '',
+                            nama: row[1] || '',
+                            kelas: row[2] || '',
+                            slotMasa: row[3] || '',
+                            telefon: row[4] || ''
+                        })).filter(reg => reg.nama && reg.nama.trim() !== ''); // Filter out empty entries
                         
                         // Save to local storage as backup
                         localStorage.setItem('uasaRegistrations', JSON.stringify(registrations));
@@ -615,6 +626,7 @@
                     }
                 } else {
                     console.warn('Tidak dapat mengambil data dari Google Sheets, menggunakan data tempatan');
+                    console.warn('Response status:', response.status, response.statusText);
                 }
             } catch (error) {
                 console.error('Ralat mengambil data dari Google Sheets:', error);
@@ -1243,15 +1255,20 @@
             // Update statistics immediately
             updateStatistics();
 
-            // Send to Google Sheets (using the same URL as configured above)
+            // Send to Google Sheets using Google Apps Script
+            const formData = new FormData();
+            formData.append('timestamp', data.timestamp);
+            formData.append('nama', data.nama);
+            formData.append('kelas', data.kelas);
+            formData.append('slotMasa', data.slotMasa);
+            formData.append('telefon', data.telefon);
+            formData.append('sheetId', SHEET_ID);
+            formData.append('sheetName', SHEET_NAME);
             
             fetch(googleScriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
+                body: formData
             })
             .then(() => {
                 // Hide form and show success message
@@ -1341,5 +1358,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988b8f4fe59ee708',t:'MTc1OTQ4NTI4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988b9a056526e708',t:'MTc1OTQ4NTcyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
