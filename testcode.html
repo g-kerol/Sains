@@ -891,6 +891,8 @@
                 const newPaymentData = {};
                 
                 // Process each data row (skip header)
+                const seenStudents = new Set(); // Track unique students to prevent duplicates
+                
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (!line) continue;
@@ -933,20 +935,29 @@
                             
                             // Only add if required fields are present
                             if (registration.nama && registration.kelas && registration.slotMasa) {
-                                newRegistrations.push(registration);
-                                console.log(`✅ Added registration: ${registration.nama} - ${registration.kelas} - ${registration.slotMasa}`);
+                                // Create unique identifier to prevent duplicates
+                                const uniqueId = `${registration.nama}_${registration.kelas}_${registration.timestamp}`;
                                 
-                                // Load payment and attendance data from columns 6 and 7 (G and H)
-                                const studentId = `${registration.nama}_${registration.kelas}_${registration.timestamp}`;
-                                const bayaranStatus = values[6] || '';
-                                const kehadiranStatus = values[7] || '';
-                                
-                                newPaymentData[studentId] = {
-                                    paid: bayaranStatus.toUpperCase() === 'SUDAH',
-                                    present: kehadiranStatus.toUpperCase() === 'HADIR'
-                                };
-                                
-                                console.log(`💰 Payment data for ${registration.nama}: paid=${newPaymentData[studentId].paid}, present=${newPaymentData[studentId].present}`);
+                                // Check if we've already seen this student
+                                if (!seenStudents.has(uniqueId)) {
+                                    seenStudents.add(uniqueId);
+                                    newRegistrations.push(registration);
+                                    console.log(`✅ Added registration: ${registration.nama} - ${registration.kelas} - ${registration.slotMasa}`);
+                                    
+                                    // Load payment and attendance data from columns 6 and 7 (G and H)
+                                    const studentId = uniqueId;
+                                    const bayaranStatus = values[6] || '';
+                                    const kehadiranStatus = values[7] || '';
+                                    
+                                    newPaymentData[studentId] = {
+                                        paid: bayaranStatus.toUpperCase() === 'SUDAH',
+                                        present: kehadiranStatus.toUpperCase() === 'HADIR'
+                                    };
+                                    
+                                    console.log(`💰 Payment data for ${registration.nama}: paid=${newPaymentData[studentId].paid}, present=${newPaymentData[studentId].present}`);
+                                } else {
+                                    console.log(`⚠️ Skipping duplicate student: ${uniqueId}`);
+                                }
                             } else {
                                 console.log(`⚠️ Skipping row ${i} - missing required fields:`, registration);
                             }
@@ -962,9 +973,26 @@
                 console.log('✅ Processing complete:', newRegistrations.length, 'registrations');
                 console.log('📊 Final registrations:', newRegistrations);
                 
+                // Merge payment data with existing local data to preserve local changes
+                const existingPaymentData = JSON.parse(localStorage.getItem('uasaPaymentData')) || {};
+                
+                // For each student, use Google Sheets data if available, otherwise keep local data
+                Object.keys(newPaymentData).forEach(studentId => {
+                    // If we have data from Google Sheets, use it
+                    if (newPaymentData[studentId]) {
+                        paymentData[studentId] = newPaymentData[studentId];
+                    }
+                });
+                
+                // For students not in Google Sheets but exist locally, keep local data
+                Object.keys(existingPaymentData).forEach(studentId => {
+                    if (!newPaymentData[studentId] && existingPaymentData[studentId]) {
+                        paymentData[studentId] = existingPaymentData[studentId];
+                    }
+                });
+                
                 // Update global variables and local storage
                 registrations = newRegistrations;
-                paymentData = newPaymentData;
                 localStorage.setItem('uasaRegistrations', JSON.stringify(registrations));
                 localStorage.setItem('uasaPaymentData', JSON.stringify(paymentData));
                 
@@ -1417,6 +1445,22 @@
             updateMarkAllButtonTexts();
         }
         
+        // Debounced sync to prevent rapid API calls
+        let syncTimeouts = {};
+        
+        function debouncedSync(studentId) {
+            // Clear existing timeout for this student
+            if (syncTimeouts[studentId]) {
+                clearTimeout(syncTimeouts[studentId]);
+            }
+            
+            // Set new timeout
+            syncTimeouts[studentId] = setTimeout(() => {
+                syncPaymentToGoogleSheets(studentId);
+                delete syncTimeouts[studentId];
+            }, 1000); // Wait 1 second before syncing
+        }
+        
         // Toggle payment status
         function togglePayment(studentId) {
             if (!paymentData[studentId]) {
@@ -1437,8 +1481,8 @@
             
             localStorage.setItem('uasaPaymentData', JSON.stringify(paymentData));
             
-            // Sync to Google Sheets
-            syncPaymentToGoogleSheets(studentId);
+            // Debounced sync to Google Sheets
+            debouncedSync(studentId);
             
             updatePaymentStatistics();
             updateMarkAllButtonTexts();
@@ -1453,8 +1497,8 @@
             paymentData[studentId].present = !paymentData[studentId].present;
             localStorage.setItem('uasaPaymentData', JSON.stringify(paymentData));
             
-            // Sync to Google Sheets
-            syncPaymentToGoogleSheets(studentId);
+            // Debounced sync to Google Sheets
+            debouncedSync(studentId);
             
             updatePaymentStatistics();
             updateMarkAllButtonTexts();
@@ -1476,9 +1520,13 @@
                 
                 const payment = paymentData[studentId] || { paid: false, present: false };
                 
+                // Create a unique identifier for the student row
+                const uniqueId = `${student.nama}_${student.kelas}_${student.timestamp}`;
+                
                 // Prepare data for Google Sheets update
                 const updateData = {
                     action: 'updatePayment',
+                    uniqueId: uniqueId,
                     timestamp: student.timestamp,
                     nama: student.nama,
                     kelas: student.kelas,
@@ -2613,5 +2661,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988e0fbcd037e708',t:'MTc1OTUxMTUxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a2aa2476a59daa',t:'MTc1OTcyNzU1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
