@@ -101,7 +101,7 @@
                         </div>
                         <div class="flex items-center">
                             <span class="text-lg mr-2">🗓</span>
-                            <span class="text-gray-700">4 Oktober 2025 (Sabtu)</span>
+                            <span class="text-gray-700">04 Oktober 2025 (Sabtu)</span>
                         </div>
                         <div class="flex items-center">
                             <span class="text-lg mr-2">🏫</span>
@@ -854,73 +854,131 @@
             try {
                 console.log('🔄 Fetching data from Google Sheets...');
                 
-                // Google Sheets CSV URL
-                const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgWOz_gOtciT9cHESUTkEI6TJZhhrdMqMLo8SdSlMrEpfWtNaoEWCBaHgoYiIuupp3buEWL-OXJx1-/pub?gid=0&single=true&output=csv';
+                // Google Sheets CSV URLs
+                const registrationCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgWOz_gOtciT9cHESUTkEI6TJZhhrdMqMLo8SdSlMrEpfWtNaoEWCBaHgoYiIuupp3buEWL-OXJx1-/pub?gid=0&single=true&output=csv';
+                const attendanceCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgWOz_gOtciT9cHESUTkEI6TJZhhrdMqMLo8SdSlMrEpfWtNaoEWCBaHgoYiIuupp3buEWL-OXJx1-/pub?gid=1466024986&single=true&output=csv';
                 
-                const response = await fetch(csvUrl, {
+                // Fetch registration data
+                const registrationResponse = await fetch(registrationCsvUrl, {
                     cache: 'no-cache',
                     headers: {
                         'Cache-Control': 'no-cache'
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (!registrationResponse.ok) {
+                    throw new Error(`HTTP error! status: ${registrationResponse.status}`);
                 }
                 
-                const csvText = await response.text();
-                console.log('📄 CSV data received, length:', csvText.length);
-                console.log('📄 Raw CSV content:', csvText.substring(0, 500) + '...');
+                const registrationCsvText = await registrationResponse.text();
+                console.log('📄 Registration CSV data received, length:', registrationCsvText.length);
                 
-                // Parse CSV data with better handling
-                const lines = csvText.split('\n').filter(line => line.trim());
+                // Fetch attendance data
+                let attendanceCsvText = '';
+                try {
+                    const attendanceResponse = await fetch(attendanceCsvUrl, {
+                        cache: 'no-cache',
+                        headers: {
+                            'Cache-Control': 'no-cache'
+                        }
+                    });
+                    
+                    if (attendanceResponse.ok) {
+                        attendanceCsvText = await attendanceResponse.text();
+                        console.log('📄 Attendance CSV data received, length:', attendanceCsvText.length);
+                    } else {
+                        console.log('⚠️ Attendance sheet not accessible, using local data');
+                    }
+                } catch (attendanceError) {
+                    console.log('⚠️ Error fetching attendance data:', attendanceError.message);
+                }
                 
-                if (lines.length <= 1) {
-                    console.log('⚠️ No data rows found in CSV (only header or empty)');
+                // Parse registration CSV data
+                const registrationLines = registrationCsvText.split('\n').filter(line => line.trim());
+                
+                if (registrationLines.length <= 1) {
+                    console.log('⚠️ No registration data found in CSV (only header or empty)');
                     if (isAdminLoggedIn) {
                         showTemporaryMessage('ℹ️ Google Sheets kosong - tiada pendaftaran', 'info');
                     }
                     return true;
                 }
                 
-                // Parse header
-                const headerLine = lines[0];
-                console.log('📋 Raw header line:', headerLine);
+                // Parse attendance CSV data
+                const attendanceData = {};
+                if (attendanceCsvText) {
+                    const attendanceLines = attendanceCsvText.split('\n').filter(line => line.trim());
+                    console.log('📋 Processing attendance data, lines:', attendanceLines.length);
+                    
+                    // Process attendance data (skip header)
+                    for (let i = 1; i < attendanceLines.length; i++) {
+                        const line = attendanceLines[i].trim();
+                        if (!line) continue;
+                        
+                        try {
+                            const values = parseCSVLine(line);
+                            if (values.length >= 3) {
+                                const nama = values[0] || '';
+                                const kelas = values[1] || '';
+                                const bayaran = values[2] || '';
+                                const kehadiran = values[3] || '';
+                                
+                                if (nama && kelas) {
+                                    const studentKey = `${nama}_${kelas}`;
+                                    attendanceData[studentKey] = {
+                                        paid: bayaran.toUpperCase() === 'SUDAH',
+                                        present: kehadiran.toUpperCase() === 'HADIR'
+                                    };
+                                    console.log(`📊 Attendance data loaded: ${nama} - Paid: ${attendanceData[studentKey].paid}, Present: ${attendanceData[studentKey].present}`);
+                                }
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ Error parsing attendance row', i, ':', error.message);
+                        }
+                    }
+                }
+                
+                console.log('📋 Raw registration header line:', registrationLines[0]);
                 
                 const newRegistrations = [];
                 const newPaymentData = {};
                 
-                // Process each data row (skip header)
+                // Process each registration data row (skip header)
                 const seenStudents = new Set(); // Track unique students to prevent duplicates
                 
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
+                // Helper function to parse CSV line
+                function parseCSVLine(line) {
+                    const values = [];
+                    let currentValue = '';
+                    let insideQuotes = false;
+                    
+                    for (let j = 0; j < line.length; j++) {
+                        const char = line[j];
+                        
+                        if (char === '"') {
+                            insideQuotes = !insideQuotes;
+                        } else if (char === ',' && !insideQuotes) {
+                            values.push(currentValue.trim());
+                            currentValue = '';
+                        } else {
+                            currentValue += char;
+                        }
+                    }
+                    // Add the last value
+                    values.push(currentValue.trim());
+                    return values;
+                }
+                
+                for (let i = 1; i < registrationLines.length; i++) {
+                    const line = registrationLines[i].trim();
                     if (!line) continue;
                     
                     try {
-                        console.log(`📝 Processing row ${i}:`, line);
+                        console.log(`📝 Processing registration row ${i}:`, line);
                         
-                        // Enhanced CSV parsing to handle quoted fields properly
-                        const values = [];
-                        let currentValue = '';
-                        let insideQuotes = false;
+                        const values = parseCSVLine(line);
                         
-                        for (let j = 0; j < line.length; j++) {
-                            const char = line[j];
-                            
-                            if (char === '"') {
-                                insideQuotes = !insideQuotes;
-                            } else if (char === ',' && !insideQuotes) {
-                                values.push(currentValue.trim());
-                                currentValue = '';
-                            } else {
-                                currentValue += char;
-                            }
-                        }
-                        // Add the last value
-                        values.push(currentValue.trim());
-                        
-                        console.log(`📊 Parsed values for row ${i}:`, values);
+                        console.log(`📊 Parsed registration values for row ${i}:`, values);
                         
                         if (values.length >= 5) {
                             const registration = {
@@ -944,17 +1002,28 @@
                                     newRegistrations.push(registration);
                                     console.log(`✅ Added registration: ${registration.nama} - ${registration.kelas} - ${registration.slotMasa}`);
                                     
-                                    // Load payment and attendance data from columns 6 and 7 (G and H)
+                                    // Check attendance data first, then fallback to registration sheet columns
+                                    const studentKey = `${registration.nama}_${registration.kelas}`;
                                     const studentId = uniqueId;
-                                    const bayaranStatus = values[6] || '';
-                                    const kehadiranStatus = values[7] || '';
                                     
-                                    newPaymentData[studentId] = {
-                                        paid: bayaranStatus.toUpperCase() === 'SUDAH',
-                                        present: kehadiranStatus.toUpperCase() === 'HADIR'
-                                    };
-                                    
-                                    console.log(`💰 Payment data for ${registration.nama}: paid=${newPaymentData[studentId].paid}, present=${newPaymentData[studentId].present}`);
+                                    if (attendanceData[studentKey]) {
+                                        // Use data from attendance sheet
+                                        newPaymentData[studentId] = {
+                                            paid: attendanceData[studentKey].paid,
+                                            present: attendanceData[studentKey].present
+                                        };
+                                        console.log(`💰 Using attendance sheet data for ${registration.nama}: paid=${newPaymentData[studentId].paid}, present=${newPaymentData[studentId].present}`);
+                                    } else {
+                                        // Fallback to registration sheet columns 6 and 7 (G and H)
+                                        const bayaranStatus = values[6] || '';
+                                        const kehadiranStatus = values[7] || '';
+                                        
+                                        newPaymentData[studentId] = {
+                                            paid: bayaranStatus.toUpperCase() === 'SUDAH',
+                                            present: kehadiranStatus.toUpperCase() === 'HADIR'
+                                        };
+                                        console.log(`💰 Using registration sheet data for ${registration.nama}: paid=${newPaymentData[studentId].paid}, present=${newPaymentData[studentId].present}`);
+                                    }
                                 } else {
                                     console.log(`⚠️ Skipping duplicate student: ${uniqueId}`);
                                 }
@@ -973,14 +1042,38 @@
                 console.log('✅ Processing complete:', newRegistrations.length, 'registrations');
                 console.log('📊 Final registrations:', newRegistrations);
                 
-                // Merge payment data with existing local data to preserve local changes
+                // Smart merge of payment data - prioritize Google Sheets data but preserve recent local changes
                 const existingPaymentData = JSON.parse(localStorage.getItem('uasaPaymentData')) || {};
+                const lastSyncTime = JSON.parse(localStorage.getItem('lastSyncTime')) || 0;
+                const currentTime = Date.now();
                 
-                // For each student, use Google Sheets data if available, otherwise keep local data
+                // For each student, intelligently merge data
                 Object.keys(newPaymentData).forEach(studentId => {
-                    // If we have data from Google Sheets, use it
-                    if (newPaymentData[studentId]) {
-                        paymentData[studentId] = newPaymentData[studentId];
+                    const googleData = newPaymentData[studentId];
+                    const localData = existingPaymentData[studentId];
+                    
+                    if (!localData) {
+                        // No local data, use Google Sheets data
+                        paymentData[studentId] = googleData;
+                        console.log(`📥 Using Google Sheets data for new student: ${studentId}`);
+                    } else {
+                        // Check if local data was modified recently (within last 5 minutes)
+                        const localModifiedRecently = (currentTime - lastSyncTime) < (5 * 60 * 1000);
+                        
+                        if (localModifiedRecently && (localData.paid !== googleData.paid || localData.present !== googleData.present)) {
+                            // Local data was modified recently and differs from Google Sheets - keep local
+                            paymentData[studentId] = localData;
+                            console.log(`🔄 Keeping recent local changes for: ${studentId}`, localData);
+                            
+                            // Sync the local changes back to Google Sheets
+                            setTimeout(() => {
+                                syncPaymentToGoogleSheets(studentId);
+                            }, 2000);
+                        } else {
+                            // Use Google Sheets data as source of truth
+                            paymentData[studentId] = googleData;
+                            console.log(`📥 Using Google Sheets data for: ${studentId}`, googleData);
+                        }
                     }
                 });
                 
@@ -988,8 +1081,12 @@
                 Object.keys(existingPaymentData).forEach(studentId => {
                     if (!newPaymentData[studentId] && existingPaymentData[studentId]) {
                         paymentData[studentId] = existingPaymentData[studentId];
+                        console.log(`💾 Keeping local-only data for: ${studentId}`);
                     }
                 });
+                
+                // Update last sync time
+                localStorage.setItem('lastSyncTime', JSON.stringify(currentTime));
                 
                 // Update global variables and local storage
                 registrations = newRegistrations;
@@ -1479,13 +1576,17 @@
                 }
             }
             
+            // Save immediately to localStorage with timestamp
             localStorage.setItem('uasaPaymentData', JSON.stringify(paymentData));
+            localStorage.setItem('lastSyncTime', JSON.stringify(Date.now()));
             
             // Debounced sync to Google Sheets
             debouncedSync(studentId);
             
             updatePaymentStatistics();
             updateMarkAllButtonTexts();
+            
+            console.log(`💰 Payment toggled for ${studentId}: paid=${paymentData[studentId].paid}, present=${paymentData[studentId].present}`);
         }
         
         // Toggle attendance status
@@ -1495,16 +1596,21 @@
             }
             
             paymentData[studentId].present = !paymentData[studentId].present;
+            
+            // Save immediately to localStorage with timestamp
             localStorage.setItem('uasaPaymentData', JSON.stringify(paymentData));
+            localStorage.setItem('lastSyncTime', JSON.stringify(Date.now()));
             
             // Debounced sync to Google Sheets
             debouncedSync(studentId);
             
             updatePaymentStatistics();
             updateMarkAllButtonTexts();
+            
+            console.log(`🎯 Attendance toggled for ${studentId}: present=${paymentData[studentId].present}, paid=${paymentData[studentId].paid}`);
         }
         
-        // Sync payment data to Google Sheets
+        // Sync payment data to Google Sheets (Attendance Sheet)
         async function syncPaymentToGoogleSheets(studentId) {
             try {
                 // Find the student data
@@ -1520,23 +1626,19 @@
                 
                 const payment = paymentData[studentId] || { paid: false, present: false };
                 
-                // Create a unique identifier for the student row
-                const uniqueId = `${student.nama}_${student.kelas}_${student.timestamp}`;
-                
-                // Prepare data for Google Sheets update
+                // Prepare data for Attendance Sheet update
                 const updateData = {
-                    action: 'updatePayment',
-                    uniqueId: uniqueId,
-                    timestamp: student.timestamp,
+                    action: 'updateAttendance',
                     nama: student.nama,
                     kelas: student.kelas,
-                    slotMasa: student.slotMasa,
-                    telefon: student.telefon,
                     bayaran: payment.paid ? 'SUDAH' : 'BELUM',
-                    kehadiran: payment.present ? 'HADIR' : 'TIDAK'
+                    kehadiran: payment.present ? 'HADIR' : 'TIDAK',
+                    timestamp: student.timestamp,
+                    slotMasa: student.slotMasa,
+                    telefon: student.telefon
                 };
                 
-                console.log('🔄 Syncing payment data to Google Sheets:', updateData);
+                console.log('🔄 Syncing attendance data to Google Sheets:', updateData);
                 
                 // Send to Google Sheets
                 const googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbxA_6cx4IbdodAmpAPll0c8IfsK-s3rwOeqnBL6bP2fqzmU2BJP8e084a3XnAz_XVsRLA/exec';
@@ -1550,10 +1652,10 @@
                     body: JSON.stringify(updateData)
                 });
                 
-                console.log('✅ Payment data synced to Google Sheets successfully');
+                console.log('✅ Attendance data synced to Google Sheets successfully');
                 
             } catch (error) {
-                console.error('❌ Error syncing payment data to Google Sheets:', error);
+                console.error('❌ Error syncing attendance data to Google Sheets:', error);
                 // Don't show error to user as the data is still saved locally
             }
         }
@@ -2661,5 +2763,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a2aa2476a59daa',t:'MTc1OTcyNzU1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a2c43cc6f39fda',t:'MTc1OTcyODYyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
