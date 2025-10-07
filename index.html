@@ -1465,7 +1465,7 @@
                                         <span class="text-xs text-gray-600 font-medium">💰</span>
                                         <label class="slide-toggle payment">
                                             <input type="checkbox" id="payment_${studentId}" ${payment.paid ? 'checked' : ''} 
-                                                   onchange="togglePayment('${studentId}')">
+                                                   onchange="togglePayment('${studentId}')" data-student-id="${studentId}" data-type="payment">
                                             <span class="slider"></span>
                                         </label>
                                     </div>
@@ -1474,7 +1474,7 @@
                                         <span class="text-xs text-gray-600 font-medium">🎯</span>
                                         <label class="slide-toggle attendance">
                                             <input type="checkbox" id="attendance_${studentId}" ${payment.present ? 'checked' : ''} 
-                                                   onchange="toggleAttendance('${studentId}')">
+                                                   onchange="toggleAttendance('${studentId}')" data-student-id="${studentId}" data-type="attendance">
                                             <span class="slider"></span>
                                         </label>
                                     </div>
@@ -1496,8 +1496,30 @@
             
             paymentStudentsList.innerHTML = studentsHTML;
             
+            // Preserve toggle states after DOM update
+            preserveToggleStates();
+            
             // Update button texts after updating the list
             updateMarkAllButtonTexts();
+        }
+        
+        // Function to preserve toggle states after DOM updates
+        function preserveToggleStates() {
+            // Get all toggle inputs
+            const toggleInputs = document.querySelectorAll('input[data-student-id][data-type]');
+            
+            toggleInputs.forEach(input => {
+                const studentId = input.getAttribute('data-student-id');
+                const type = input.getAttribute('data-type');
+                
+                if (paymentData[studentId]) {
+                    if (type === 'payment') {
+                        input.checked = paymentData[studentId].paid;
+                    } else if (type === 'attendance') {
+                        input.checked = paymentData[studentId].present;
+                    }
+                }
+            });
         }
         
         // Debounced sync to prevent rapid API calls
@@ -1612,18 +1634,8 @@
                 
                 console.log('✅ Attendance data synced to Google Sheets successfully');
                 
-                // Show success message to admin
-                if (isAdminLoggedIn) {
-                    showTemporaryMessage(`✅ ${student.nama} - Status dikemas kini`, 'success');
-                }
-                
             } catch (error) {
                 console.error('❌ Error syncing attendance data to Google Sheets:', error);
-                
-                // Show error message to admin
-                if (isAdminLoggedIn) {
-                    showTemporaryMessage('⚠️ Ralat mengemas kini ke Google Sheets', 'warning');
-                }
             }
         }
         
@@ -2699,5 +2711,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a97f08f1f6fcff',t:'MTc1OTc5OTE5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a98fb5e13c5f32',t:'MTc1OTc5OTg3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
