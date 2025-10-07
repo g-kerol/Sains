@@ -90,7 +90,7 @@
                     <div class="grid md:grid-cols-2 gap-3 text-sm">
                         <div class="flex items-center">
                             <span class="text-lg mr-2">👨‍🏫</span>
-                            <span class="text-gray-700">Cikgu Khairul Anuar
+                            <span class="text-gray-700">Cikgu Khairul 
                                 <a href="https://wa.me/60126866412" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 font-medium inline-flex items-center">
                                     <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
@@ -727,7 +727,7 @@
 
                 <!-- Mark All Buttons -->
                 <div class="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-200">
-                    <div class="flex justify-center space-x-4">
+                    <div class="flex justify-center space-x-4 mb-4">
                         <button id="markAllPaymentBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center">
                             <span class="mr-2">💰</span>
                             <span id="markAllPaymentText">Semua Bayar</span>
@@ -736,6 +736,17 @@
                             <span class="mr-2">🎯</span>
                             <span id="markAllAttendanceText">Semua Hadir</span>
                         </button>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <div class="text-center">
+                            <button id="submitAttendanceBtn" disabled class="bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg cursor-not-allowed flex items-center mx-auto">
+                                <span class="mr-2">📤</span>
+                                <span>Tiada Perubahan</span>
+                            </button>
+                            <p class="text-xs text-gray-500 mt-2">Klik toggle bayaran/kehadiran, kemudian tekan submit untuk hantar ke Google Sheets</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1522,20 +1533,27 @@
             });
         }
         
-        // Debounced sync to prevent rapid API calls
-        let syncTimeouts = {};
+        // Track changes for batch submission
+        let pendingChanges = new Set();
         
-        function debouncedSync(studentId) {
-            // Clear existing timeout for this student
-            if (syncTimeouts[studentId]) {
-                clearTimeout(syncTimeouts[studentId]);
+        function addPendingChange(studentId) {
+            pendingChanges.add(studentId);
+            updateSubmitButton();
+        }
+        
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitAttendanceBtn');
+            if (submitBtn) {
+                if (pendingChanges.size > 0) {
+                    submitBtn.textContent = `Submit ${pendingChanges.size} Perubahan`;
+                    submitBtn.disabled = false;
+                    submitBtn.className = 'bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center mx-auto';
+                } else {
+                    submitBtn.textContent = 'Tiada Perubahan';
+                    submitBtn.disabled = true;
+                    submitBtn.className = 'bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg cursor-not-allowed flex items-center mx-auto';
+                }
             }
-            
-            // Set new timeout
-            syncTimeouts[studentId] = setTimeout(() => {
-                syncPaymentToGoogleSheets(studentId);
-                delete syncTimeouts[studentId];
-            }, 1000); // Wait 1 second before syncing
         }
         
         // Toggle payment status
@@ -1560,8 +1578,8 @@
             localStorage.setItem('uasaPaymentData', JSON.stringify(paymentData));
             localStorage.setItem('lastSyncTime', JSON.stringify(Date.now()));
             
-            // Debounced sync to Google Sheets
-            debouncedSync(studentId);
+            // Track change for submission
+            addPendingChange(studentId);
             
             updatePaymentStatistics();
             updateMarkAllButtonTexts();
@@ -1581,8 +1599,8 @@
             localStorage.setItem('uasaPaymentData', JSON.stringify(paymentData));
             localStorage.setItem('lastSyncTime', JSON.stringify(Date.now()));
             
-            // Debounced sync to Google Sheets
-            debouncedSync(studentId);
+            // Track change for submission
+            addPendingChange(studentId);
             
             updatePaymentStatistics();
             updateMarkAllButtonTexts();
@@ -1590,52 +1608,99 @@
             console.log(`🎯 Attendance toggled for ${studentId}: present=${paymentData[studentId].present}, paid=${paymentData[studentId].paid}`);
         }
         
-        // Sync payment and attendance data to Google Sheets
-        async function syncPaymentToGoogleSheets(studentId) {
+        // Submit all pending attendance changes to Google Sheets
+        async function submitAttendanceChanges() {
+            if (pendingChanges.size === 0) {
+                showTemporaryMessage('⚠️ Tiada perubahan untuk dihantar', 'warning');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitAttendanceBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Menghantar...';
+            
             try {
-                // Find the student data
-                const student = registrations.find(r => {
-                    const id = `${r.nama}_${r.kelas}_${r.timestamp}`;
-                    return id === studentId;
-                });
+                const googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbxA_6cx4IbdodAmpAPll0c8IfsK-s3rwOeqnBL6bP2fqzmU2BJP8e084a3XnAz_XVsRLA/exec';
+                let successCount = 0;
+                let errorCount = 0;
                 
-                if (!student) {
-                    console.error('Student not found for ID:', studentId);
-                    return;
+                // Process each pending change
+                for (const studentId of pendingChanges) {
+                    try {
+                        // Find the student data
+                        const student = registrations.find(r => {
+                            const id = `${r.nama}_${r.kelas}_${r.timestamp}`;
+                            return id === studentId;
+                        });
+                        
+                        if (!student) {
+                            console.error('Student not found for ID:', studentId);
+                            errorCount++;
+                            continue;
+                        }
+                        
+                        const payment = paymentData[studentId] || { paid: false, present: false };
+                        
+                        // Prepare data for Attendance Sheet (Kehadiran)
+                        const attendanceData = {
+                            action: 'updateAttendance',
+                            nama: student.nama,
+                            kelas: student.kelas,
+                            bayaran: payment.paid ? 'SUDAH' : 'BELUM',
+                            kehadiran: payment.present ? 'HADIR' : 'TIDAK'
+                        };
+                        
+                        console.log('📤 Submitting attendance data:', attendanceData);
+                        
+                        // Send to Google Sheets
+                        await fetch(googleSheetsUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(attendanceData)
+                        });
+                        
+                        successCount++;
+                        console.log(`✅ Submitted: ${student.nama} - Bayar: ${payment.paid ? 'SUDAH' : 'BELUM'}, Hadir: ${payment.present ? 'HADIR' : 'TIDAK'}`);
+                        
+                        // Small delay between requests
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        
+                    } catch (error) {
+                        console.error('❌ Error submitting student data:', error);
+                        errorCount++;
+                    }
                 }
                 
-                const payment = paymentData[studentId] || { paid: false, present: false };
+                // Clear pending changes
+                pendingChanges.clear();
+                updateSubmitButton();
                 
-                // Prepare data for Attendance Sheet (Kehadiran)
-                const attendanceData = {
-                    action: 'updateAttendance',
-                    nama: student.nama,
-                    kelas: student.kelas,
-                    bayaran: payment.paid ? 'SUDAH' : 'BELUM',
-                    kehadiran: payment.present ? 'HADIR' : 'TIDAK',
-                    timestamp: student.timestamp,
-                    slotMasa: student.slotMasa,
-                    telefon: student.telefon
-                };
+                // Show success message
+                if (successCount > 0) {
+                    showTemporaryMessage(`✅ ${successCount} data kehadiran telah dihantar ke Google Sheets!`, 'success');
+                }
                 
-                console.log('🔄 Syncing attendance data to Google Sheets:', attendanceData);
+                if (errorCount > 0) {
+                    showTemporaryMessage(`⚠️ ${errorCount} data gagal dihantar`, 'warning');
+                }
                 
-                // Send to Google Sheets
-                const googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbxA_6cx4IbdodAmpAPll0c8IfsK-s3rwOeqnBL6bP2fqzmU2BJP8e084a3XnAz_XVsRLA/exec';
-                
-                const response = await fetch(googleSheetsUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(attendanceData)
-                });
-                
-                console.log('✅ Attendance data synced to Google Sheets successfully');
+                console.log(`📊 Submission complete: ${successCount} success, ${errorCount} errors`);
                 
             } catch (error) {
-                console.error('❌ Error syncing attendance data to Google Sheets:', error);
+                console.error('❌ Error in batch submission:', error);
+                showTemporaryMessage('❌ Ralat menghantar data ke Google Sheets', 'warning');
+            } finally {
+                // Reset button
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    updateSubmitButton();
+                }, 2000);
             }
         }
         
@@ -1677,8 +1742,8 @@
                     paymentData[studentId].present = true;
                 }
                 
-                // Sync each student to Google Sheets
-                syncPaymentToGoogleSheets(studentId);
+                // Track change for submission
+                addPendingChange(studentId);
             });
             
             // Update displays
@@ -1687,7 +1752,7 @@
             
             // Show success message
             const successText = newStatus ? 'ditanda sudah bayar dan hadir' : 'dihilangkan tanda bayaran';
-            showTemporaryMessage(`✅ ${currentStudents.length} murid telah ${successText}!`, 'success');
+            showTemporaryMessage(`✅ ${currentStudents.length} murid telah ${successText}! Tekan Submit untuk hantar ke Google Sheets.`, 'success');
         }
         
         // Toggle all attendance status
@@ -1723,8 +1788,8 @@
                 }
                 paymentData[studentId].present = newStatus;
                 
-                // Sync each student to Google Sheets
-                syncPaymentToGoogleSheets(studentId);
+                // Track change for submission
+                addPendingChange(studentId);
             });
             
             // Update displays
@@ -1733,7 +1798,7 @@
             
             // Show success message
             const successText = newStatus ? 'ditanda hadir' : 'dihilangkan tanda kehadiran';
-            showTemporaryMessage(`✅ ${currentStudents.length} murid telah ${successText}!`, 'success');
+            showTemporaryMessage(`✅ ${currentStudents.length} murid telah ${successText}! Tekan Submit untuk hantar ke Google Sheets.`, 'success');
         }
         
         // Get currently filtered students
@@ -1800,10 +1865,11 @@
         window.toggleAllPayment = toggleAllPayment;
         window.toggleAllAttendance = toggleAllAttendance;
         
-        // Add event listeners for mark all buttons
+        // Add event listeners for mark all buttons and submit
         function setupMarkAllButtons() {
             const markAllPaymentBtn = document.getElementById('markAllPaymentBtn');
             const markAllAttendanceBtn = document.getElementById('markAllAttendanceBtn');
+            const submitAttendanceBtn = document.getElementById('submitAttendanceBtn');
             
             if (markAllPaymentBtn) {
                 markAllPaymentBtn.addEventListener('click', function(e) {
@@ -1816,6 +1882,13 @@
                 markAllAttendanceBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     toggleAllAttendance();
+                });
+            }
+            
+            if (submitAttendanceBtn) {
+                submitAttendanceBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    submitAttendanceChanges();
                 });
             }
         }
@@ -1987,6 +2060,14 @@
                 // Update registration status for admin view
                 updateRegistrationStatus();
                 
+                // Start auto-refresh only if registration is open
+                if (registrationOpen) {
+                    startAutoRefresh();
+                    console.log('🔄 Auto-refresh started (registration open)');
+                } else {
+                    console.log('⏸️ Auto-refresh not started (registration closed)');
+                }
+                
                 console.log('✅ Admin session restored successfully');
             }
             
@@ -2092,7 +2173,7 @@
             console.error('❌ CRITICAL: Admin button not found - cannot add click listener!');
         }
         
-        // Auto-refresh data every 30 seconds when admin is logged in (from Google Sheets)
+        // Auto-refresh data every 30 seconds when admin is logged in AND registration is open
         let autoRefreshInterval;
         
         function startAutoRefresh() {
@@ -2101,9 +2182,11 @@
             }
             
             autoRefreshInterval = setInterval(async () => {
-                if (isAdminLoggedIn) {
+                if (isAdminLoggedIn && registrationOpen) {
                     console.log('🔄 Auto-refresh: Mengambil data dari Google Sheets...');
                     await refreshData();
+                } else if (isAdminLoggedIn && !registrationOpen) {
+                    console.log('⏸️ Auto-refresh paused - registration closed');
                 }
             }, 30000); // 30 seconds
         }
@@ -2198,6 +2281,15 @@
                     // Update local status
                     registrationOpen = newStatus;
                     localStorage.setItem('registrationOpen', JSON.stringify(registrationOpen));
+                    
+                    // Control auto-refresh based on registration status
+                    if (registrationOpen) {
+                        startAutoRefresh();
+                        console.log('🔄 Auto-refresh started (registration opened)');
+                    } else {
+                        stopAutoRefresh();
+                        console.log('⏸️ Auto-refresh stopped (registration closed)');
+                    }
                     
                     // Force update UI immediately
                     updateRegistrationStatus();
@@ -2711,5 +2803,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a98fb5e13c5f32',t:'MTc1OTc5OTg3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a9aa582663fd9e',t:'MTc1OTgwMDk2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
